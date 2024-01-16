@@ -27,6 +27,7 @@ class UserController {
       }else if(user.data.status===true){
         req.app.locals.userData= req.body
         const otp = await this.genOtp.generateOtp(4)
+        console.log(otp);
         req.app.locals.otp = otp;
         this.sendMailer.sendVerificationEmail(req.body.email, otp);
         res.status(user.status).json(user.data);
@@ -97,10 +98,8 @@ class UserController {
   async updateProfile(req: Request, res: Response) {
     try {
       if (req.file) {
-        console.log(req.file)
         const img = await this.CloudinarySetup.upload(req.file.path,"profile-pics");
         const imgUrl = img?.secure_url || "";
-        console.log(imgUrl);
         const data = req.body;
         data.profilePic = imgUrl;
         const user = await this.userCase.updateProfile(req.userId || '', data, req.body.newPassword);

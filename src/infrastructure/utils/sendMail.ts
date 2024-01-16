@@ -27,7 +27,7 @@ class sendMail {
           console.error(err);
           reject(err);
         } else {
-          console.log('Verification code sent successfully');
+          console.log('Verification code sent');
           resolve();
         }
       });

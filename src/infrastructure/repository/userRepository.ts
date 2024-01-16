@@ -23,21 +23,15 @@ class userRepository implements UserRepo {
     const users = await UserModel.find({}).select('-password');
     return users;
   }
-  
-  // async updateWalletBalance(userId: string, price: number, actionType: string): Promise<boolean> {
-  //   try {
-  //     const user = await this.findById(userId);
-  //     if (user && user.wallet) {
-  //       const walletBalance = user.wallet;
-  //       const newWalletBalance = actionType === 'increment' ? walletBalance + price : walletBalance - price;
-  //       const updated = await UserModel.updateOne({ _id: userId }, { $set: { wallet: newWalletBalance } });
-  //       if (updated) return true;
-  //     }
-  //     return false;
-  //   } catch (error) {
-  //     return false;
-  //   }
 
-  // }
+  async findOneAndUpdate(_id: string, update: Partial<User>): Promise<User | null> {
+    const user = await UserModel.findOneAndUpdate(
+      { _id },
+      { $set: update },
+      { new: true }
+    );
+    return user;
+  }
+  
 }
 export default userRepository;

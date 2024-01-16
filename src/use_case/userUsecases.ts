@@ -41,7 +41,7 @@ class UserUseCase {
 
   async newUser(user:User){
     const hashedPass = await this.Encrypt.generateHash(user.password)
-    const newUser = { ...user, password: hashedPass }
+    const newUser = { ...user,is_verified:true,password: hashedPass }
     await this.UserRepository.save(newUser);
     return {
       status: 200,
@@ -68,7 +68,7 @@ class UserUseCase {
 
         const passwordMatch = await this.Encrypt.compare(user.password, userData.password);
 
-        if (passwordMatch||userData.is_google) {
+        if (passwordMatch || userData.is_google) {
           const userId = userData?._id;
           if (userId) {
             token = this.JWTToken.generateToken(userId, 'user');
@@ -126,36 +126,78 @@ class UserUseCase {
     }
   }
 
+  // async updateProfile(id: string, user: User, newPassword?: string) {
+  //   const userData = await this.UserRepository.findById(id);
+  //   if (userData) {
+  //     userData.fname = user.fname || userData.fname;
+  //     userData.lname = user.lname || userData.lname;
+  //     userData.mobile = user.mobile || userData.mobile;
+  //     userData.profilePic = user.profilePic || userData.profilePic;
+  //     if (user.password) {
+  //       const passwordMatch = await this.Encrypt.compare(user.password, userData.password);
+  //       if (passwordMatch && newPassword) {
+  //         userData.password = await this.Encrypt.generateHash(newPassword);
+  //       } else {
+  //         return {
+  //           status: 400,
+  //           data: { message: 'Password does not match!' }
+  //         };
+  //       }
+  //     }
+  //     const updatedUser = await this.UserRepository.save(userData);
+  //     return {
+  //       status: 200,
+  //       data: updatedUser
+  //     };
+  //   } else {
+  //     return {
+  //       status: 400,
+  //       data: { message: 'User not found' }
+  //     };
+  //   }
+  // }
+   
   async updateProfile(id: string, user: User, newPassword?: string) {
-    const userData = await this.UserRepository.findById(id);
+    const userData = await this.UserRepository.findOneAndUpdate(id, {
+      fname: user.fname,
+      lname: user.lname,
+      mobile: user.mobile,
+      profilePic: user.profilePic,
+    });
+
     if (userData) {
-      userData.fname = user.fname || userData.fname;
-      userData.lname = user.lname || userData.lname;
-      userData.mobile = user.mobile || userData.mobile;
-      userData.profilePic = user.profilePic || userData.profilePic;
       if (user.password) {
         const passwordMatch = await this.Encrypt.compare(user.password, userData.password);
+
         if (passwordMatch && newPassword) {
-          userData.password = await this.Encrypt.generateHash(newPassword);
+          const updatedUserData = await this.UserRepository.findOneAndUpdate(id, {
+            password: await this.Encrypt.generateHash(newPassword),
+          });
+
+          return {
+            status: 200,
+            data: updatedUserData,
+          };
         } else {
           return {
             status: 400,
-            data: { message: 'Password does not match!' }
+            data: { message: 'Password does not match!' },
           };
         }
       }
-      const updatedUser = await this.UserRepository.save(userData);
+
       return {
         status: 200,
-        data: updatedUser
+        data: userData,
       };
     } else {
       return {
         status: 400,
-        data: { message: 'User not found' }
+        data: { message: 'User not found' },
       };
     }
   }
+
 }
 
 export default UserUseCase;

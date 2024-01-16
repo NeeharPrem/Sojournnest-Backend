@@ -26,6 +26,7 @@ const controller=new userController(useCase,sendMail,cloudinary,generateOtp)
 const router=express.Router();
 
 router.post("/signup",(req,res)=>controller.signup(req,res));
+router.post("/signupVerification",(req,res)=>controller.signupVerification(req,res))
 router.post("/login",(req,res)=>controller.login(req,res));
 router.post("/logout",(req,res)=>controller.logout(req,res));
 
