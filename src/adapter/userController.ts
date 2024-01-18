@@ -74,7 +74,7 @@ class UserController {
 
   async logout(req: Request, res: Response) {
     try {
-      res.cookie("userId",{
+      res.cookie("userId","",{
         httpOnly: true,
         expires: new Date(0),
       });

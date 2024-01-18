@@ -126,36 +126,6 @@ class UserUseCase {
     }
   }
 
-  // async updateProfile(id: string, user: User, newPassword?: string) {
-  //   const userData = await this.UserRepository.findById(id);
-  //   if (userData) {
-  //     userData.fname = user.fname || userData.fname;
-  //     userData.lname = user.lname || userData.lname;
-  //     userData.mobile = user.mobile || userData.mobile;
-  //     userData.profilePic = user.profilePic || userData.profilePic;
-  //     if (user.password) {
-  //       const passwordMatch = await this.Encrypt.compare(user.password, userData.password);
-  //       if (passwordMatch && newPassword) {
-  //         userData.password = await this.Encrypt.generateHash(newPassword);
-  //       } else {
-  //         return {
-  //           status: 400,
-  //           data: { message: 'Password does not match!' }
-  //         };
-  //       }
-  //     }
-  //     const updatedUser = await this.UserRepository.save(userData);
-  //     return {
-  //       status: 200,
-  //       data: updatedUser
-  //     };
-  //   } else {
-  //     return {
-  //       status: 400,
-  //       data: { message: 'User not found' }
-  //     };
-  //   }
-  // }
    
   async updateProfile(id: string, user: User, newPassword?: string) {
     const userData = await this.UserRepository.findOneAndUpdate(id, {

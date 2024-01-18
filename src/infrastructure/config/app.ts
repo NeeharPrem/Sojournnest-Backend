@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import user from "../route/userRoute";
+import admin from "../route/adminRoute"
 // import session from "express-session";
 import http from "http";
 import path from 'path'
@@ -28,6 +29,7 @@ const createServer = () => {
     app.use(cookieParser());
     app.options("*", cors());
     app.use("/api/user", user);
+    app.use("/api/admin", admin);
 
     const server = http.createServer(app);
     initializeSocket(server);
