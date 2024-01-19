@@ -32,6 +32,12 @@ class userRepository implements UserRepo {
     );
     return user;
   }
-  
+
+  async findAndUpdate(user:User): Promise<any> {
+        if (user._id) {
+            const updatedUser= await UserModel.findByIdAndUpdate(user._id,user, { new: true });
+            return updatedUser
+        }
+    }
 }
 export default userRepository;

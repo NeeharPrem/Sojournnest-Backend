@@ -78,6 +78,31 @@ class adminUsercases{
             console.log(error)
         }
     }
+
+    async blockUser(id: any) {
+        try {
+            const user = await this.userRepository.findById(id);
+            if (user) {
+                const { is_blocked, ...userData } = user.toObject();
+                const update = { is_blocked: !is_blocked, ...userData };
+                await this.userRepository.findAndUpdate(update);
+                return {
+                    status:200,
+                    data:update
+                }
+            }else{
+                return {
+                    status: 404,
+                    data: "User Not Found"
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+
 }
 
 export default adminUsercases

@@ -20,24 +20,18 @@ class AdminRepository implements AdminRepo {
         }
     }
 
-    async findUsers(): Promise<any> {
-        const users = await UserModel.find({})
-        if (users) {
-            return users
-        } else {
-            return null
-        }
-    }
-
-    async blockUser(userId: string): Promise<Admin | null> {
+    async findUsers(page: number = 1, pageSize: number = 10): Promise<any> {
         try {
-            const admin = await AdminModel.findByIdAndUpdate(userId, { isBlocked: true }, { new: true }).exec();
-            return admin;
+            const users = await UserModel.find({})
+                .limit(pageSize)
+                .skip((page - 1) * pageSize);
+            return users;
         } catch (error) {
-            console.error('Error in blockUser:', error);
+            console.error(error);
             return null;
         }
     }
+
 }
 
 export default AdminRepository;

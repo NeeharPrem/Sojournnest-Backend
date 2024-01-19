@@ -22,5 +22,7 @@ const router = express.Router();
 // Define your routes here
 router.post("/login", (req, res) => controller.login(req, res));
 router.get("/users",(req,res)=>controller.allUsers(req,res))
+
+router.post("/blockUser/:id",(req,res)=>controller.blockUser(req,res))
 // router.post("/logout", adminProtect, (req, res) => controller.logout(req, res));
 export default router;

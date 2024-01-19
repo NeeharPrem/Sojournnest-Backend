@@ -55,5 +55,14 @@ class AdminController{
         }
     }
 
+    async blockUser(req:Request,res:Response){
+        try {
+            const user = await this.adminUsecase.blockUser(req?.params.id)
+            return res.status(user.status).json(user.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 }
 export default AdminController
