@@ -1,6 +1,9 @@
 import userController from "../../adapter/userController";
+import UserHostController from "../../adapter/userhsotController";
 import userRepository from "../repository/userRepository";
+import HostRepository from "../repository/HostRepository";
 import Userusecase from "../../use_case/userUsecases";
+import UserHostUsecase from "../../use_case/userhostUsecase";
 import Encrypt from "../passwordRepository/hashpassword";
 import express, { Router } from "express";
 import GenerateOTP from "../utils/generateOtp";
@@ -18,10 +21,13 @@ const cloudinary= new CloudinarySetup();
 const generateOtp= new GenerateOTP()
 
 const repository= new userRepository();
+const repositoryHost= new HostRepository()
 
 const useCase=new Userusecase(encrypt,repository,JWTPassword)
+const hostuseCase= new UserHostUsecase(repositoryHost,cloudinary)
 
 const controller=new userController(useCase,sendMail,cloudinary,generateOtp)
+const hostcontroller= new UserHostController(hostuseCase)
 
 const router=express.Router();
 
@@ -33,4 +39,6 @@ router.post("/logout",(req,res)=>controller.logout(req,res));
 router.get("/profile", protect, (req, res) => controller.profile(req, res))
 router.put("/updateProfile", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 
+// host adding rooms
+router.put('/addRoom', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
 export default router
