@@ -1,10 +1,10 @@
 import Admin from "../../domain/admin";
 import User from "../../domain/user";
 
-interface AdminRepo {
+interface IAdminRepo {
     findByEmail(email: string): Promise<Admin | null>;
     findById(_id: string): Promise<User | null>;
     findUsers(): Promise<any>;
 }
 
-export default AdminRepo;
+export default IAdminRepo;

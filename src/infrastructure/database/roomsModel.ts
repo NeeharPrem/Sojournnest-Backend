@@ -2,10 +2,12 @@ import mongoose, { Document, Schema, ObjectId } from "mongoose";
 
 interface Rooms extends Document {
     images: string[];
-    guest: string;
+    guests: string;
     bedrooms: string;
     bathrooms: string;
     is_blocked: boolean;
+    is_approved:boolean;
+    is_listed:boolean;
     amenities: string[];
     subdescription: string;
     _id: string;
@@ -84,6 +86,17 @@ const roomsSchema: Schema<Rooms> = new mongoose.Schema({
     category: {
         type: String,
         default: "",
+    },
+    guests:{
+        type:String
+    },
+    is_approved:{
+        type:Boolean,
+        default:false
+    },
+    is_listed:{
+        type:Boolean,
+        default:true
     }
 },
     {

@@ -1,11 +1,14 @@
 import { ObjectId } from "mongoose";
 
 interface Room {
+    [x: string]: any;
     images?: Array<Object> | any;
-    guests: number;
-    bedrooms: number;
-    bathrooms: number;
+    guests: string;
+    bedrooms: string;
+    bathrooms: string;
     is_blocked: boolean;
+    is_approved:boolean;
+    is_listed:boolean;
     amenities: string[];
     subdescription: string;
     _id?: string;

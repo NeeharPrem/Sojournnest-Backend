@@ -1,7 +1,11 @@
 import Room from "../../domain/room";
 
-interface HostRepo{
+interface IHostRepo{
     addnewRoom(roomData:Room): Promise<any>;
+    findListings():Promise<any>;
+    findById(_id: string): Promise<Room | null>;
+    getListings(_id: string): Promise<Room[]>;
+    findOneAndUpdate(query: any, update: any, options?: any): Promise<Room | null>; 
 }
 
-export default HostRepo;
+export default IHostRepo;

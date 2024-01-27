@@ -1,17 +1,18 @@
 import Room from "../domain/room"
 import HostRepository from "../infrastructure/repository/HostRepository"
 import CloudinarySetup from "../infrastructure/utils/cloudinarySetup"
+import IHostRepo from "./interface/hostRepo"
 
 
 class UserHostUsecase {
-    private hostRepository:HostRepository
+    private IHostRepo: IHostRepo
     private CloudinarySetup: CloudinarySetup
 
     constructor(
-        hostRepository: HostRepository,
+        IHostRepo: IHostRepo,
         CloudinarySetup: CloudinarySetup
     ){
-        ;this.hostRepository = hostRepository;
+        ; this.IHostRepo = IHostRepo;
         this.CloudinarySetup = CloudinarySetup;
     }
 
@@ -25,7 +26,7 @@ class UserHostUsecase {
             );
             console.log(uploadImages)
             roomData.images=uploadImages
-            const roomStatus= await this.hostRepository.addnewRoom(roomData)
+            const roomStatus = await this.IHostRepo.addnewRoom(roomData)
             if(roomStatus){
                 return{
                     status:200,
@@ -37,6 +38,23 @@ class UserHostUsecase {
                 status: 400,
                 data: { message: 'Failed to add Room' },
             };
+        }
+    }
+
+    async getListings(id:string){
+        const roomData = await this.IHostRepo.getListings(id)
+        if (roomData.length > 0) {
+            return {
+                status: 200,
+                data: roomData
+            }
+        } else {
+            return {
+                status: 400,
+                data: {
+                    message: "No Room Data Found"
+                }
+            }
         }
     }
 }

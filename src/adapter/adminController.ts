@@ -64,5 +64,41 @@ class AdminController{
         }
     }
 
+    async allListings(req: Request, res: Response) {
+        try {
+            const Data = await this.adminUsecase.findListings();
+            if (Data) {
+                const { status, data } = Data;
+                return res.status(status).json(data);
+            } else {
+                return res.status(500).json("Internal Server Error");
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json("Internal Server Error");
+        }
+    }
+
+    async approveListing(req:Request,res:Response){
+        try {
+            console.log("yup")
+            const Data=await this.adminUsecase.approveListing(req?.params.id)
+            return res.status(200).json(Data?.data)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal server Error")
+        }
+    }
+
+    async blocListing(req: Request, res: Response) {
+        try {
+            const user = await this.adminUsecase.blockListing(req?.params.id)
+            return res.status(user.status).json(user.data)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json('Internal server Error')
+        }
+    }
+
 }
 export default AdminController

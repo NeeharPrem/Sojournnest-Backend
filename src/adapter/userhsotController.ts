@@ -15,9 +15,9 @@ class UserHostController {
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
             const Id=decoded.userId
 
-            const { latitude, longitude, state, district, category, name, bedrooms, bathrooms, guests, subdescription, description, rent, amenities}=req.body
+            const {latitude,longitude,state,district,category,name,bedrooms,bathrooms,guests,subdescription,description, rent, amenities}=req.body
             if (!latitude || !longitude || !state || !district || !category || !name || !bedrooms || !bathrooms || !guests || !subdescription || !description || !rent) {
-                return res.status(400).json({ error: 'Missing required fields' });
+                return res.status(400).json('Missing required fields');
             }
             const images = req.files
             const roomData={
@@ -37,6 +37,8 @@ class UserHostController {
                 rent,
                 images,
                 is_blocked:false,
+                is_approved:false,
+                is_listed:true
             }
             const roomAdded= await this.userhostUsecase.addRoom(roomData)
             if(roomAdded){
@@ -44,6 +46,21 @@ class UserHostController {
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    async getListings (req:Request,res:Response){
+        try {
+            const token = req.cookies.userJWT
+            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+            const Id = decoded.userId
+            const Data=await this.userhostUsecase.getListings(Id)
+            if(Data){
+                return res.status(Data.status).json(Data.data)
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal Server Error")
         }
     }
 }

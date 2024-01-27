@@ -6,14 +6,16 @@ import express from "express";
 import jwtPassword from "../passwordRepository/jwtpassword";
 import { adminProtect } from "../middleware/adminAuth";
 import UserRepository from "../repository/userRepository";
+import HostRepository from "../repository/HostRepository";
 
 const encrypt = new Encrypt();
 const jwtToken = new jwtPassword();
 
 const adminRepository = new AdminRepository();
 const userRepository = new UserRepository();
+const hostRepository= new HostRepository ()
 
-const admiUseCase = new AdminUsercases(encrypt, userRepository,jwtToken,adminRepository);
+const admiUseCase = new AdminUsercases(encrypt, userRepository, jwtToken, adminRepository, hostRepository);
 
 const controller = new AdminController(admiUseCase);
 
@@ -21,8 +23,14 @@ const router = express.Router();
 
 // Define your routes here
 router.post("/login", (req, res) => controller.login(req, res));
-router.get("/users",(req,res)=>controller.allUsers(req,res))
-
-router.post("/blockUser/:id",(req,res)=>controller.blockUser(req,res))
 // router.post("/logout", adminProtect, (req, res) => controller.logout(req, res));
+
+// user action routes
+router.get("/users",(req,res)=>controller.allUsers(req,res))
+router.post("/blockUser/:id",(req,res)=>controller.blockUser(req,res))
+
+//Listing action routes
+router.get("/listings", (req, res) => controller.allListings(req,res))
+router.post('/approveListing/:id', (req, res) => controller.approveListing(req, res))
+router.post('/blockListing/:id',(req,res)=>controller.blocListing(req,res))
 export default router;

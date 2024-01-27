@@ -3,7 +3,7 @@ import { UserModel } from "../database/useModel";
 import UserRepo from "../../use_case/interface/userRepo";
 
 class userRepository implements UserRepo {
-  async save(user: User): Promise<User> {
+  async save(user: User){
     const newUser = new UserModel(user);
     await newUser.save();
     return newUser;

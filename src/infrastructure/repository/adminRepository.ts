@@ -1,5 +1,6 @@
 import { AdminModel } from "../database/adminModel";
 import { UserModel } from "../database/useModel";
+import { RoomsModel } from "../database/roomsModel";
 import AdminRepo from "../../use_case/interface/adminRepo";
 import Admin from "../../domain/admin";
 import User from "../../domain/user";
@@ -23,6 +24,18 @@ class AdminRepository implements AdminRepo {
     async findUsers(page: number = 1, pageSize: number = 10): Promise<any> {
         try {
             const users = await UserModel.find({})
+                .limit(pageSize)
+                .skip((page - 1) * pageSize);
+            return users;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    async findListings(page: number = 1, pageSize: number = 10): Promise<any> {
+        try {
+            const users = await RoomsModel.find({})
                 .limit(pageSize)
                 .skip((page - 1) * pageSize);
             return users;
