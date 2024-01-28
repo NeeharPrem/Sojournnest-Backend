@@ -42,4 +42,5 @@ router.put("/updateProfile", protect, ImageUpload.single('avatar'),(req,res)=>co
 // host adding rooms
 router.put('/addRoom', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
 router.get('/getListings',(req,res)=>hostcontroller.getListings(req,res))
+router.post('/unlist/:id',(req,res)=>hostcontroller.unlist(req,res))
 export default router
