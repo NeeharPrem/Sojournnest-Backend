@@ -76,6 +76,19 @@ class UserHostController {
             return res.status(500).json("Internal Server Error")
         }
     }
+
+    async roomData(req: Request, res: Response) {
+        try {
+            const Id = req.params.id
+            const Data = await this.userhostUsecase.roomData(Id)
+            if (Data) {
+                return res.status(Data.status).json(Data.data)
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal Server Error")
+        }
+    }
 }
 
 export default UserHostController;

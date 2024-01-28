@@ -76,6 +76,23 @@ class UserHostUsecase {
             }
         }
     }
+
+    async roomData(id: string) {
+        const roomData = await this.IHostRepo.findById(id)
+        if (roomData) {
+            return {
+                status: 200,
+                data: roomData
+            }
+        } else {
+            return {
+                status: 400,
+                data: {
+                    message: "Failed to unlist"
+                }
+            }
+        }
+    }
 }
 
 export default UserHostUsecase
