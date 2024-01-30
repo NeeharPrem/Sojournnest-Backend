@@ -40,8 +40,10 @@ router.get("/profile", protect, (req, res) => controller.profile(req, res))
 router.put("/updateProfile", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 
 // host adding rooms
-router.put('/addRoom', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
+router.put('/addRoom', ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
 router.get('/getListings',(req,res)=>hostcontroller.getListings(req,res))
 router.post('/unlist/:id',(req,res)=>hostcontroller.unlist(req,res))
 router.get('/roomData/:id', (req, res) => hostcontroller.roomData(req, res))
+router.put('/roomDataUpdate/:id', ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
+router.get('/homeListings', (req, res) => hostcontroller.allListings(req, res))
 export default router

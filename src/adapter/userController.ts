@@ -39,18 +39,18 @@ class UserController {
     }
   }
 
-  async signupVerification (req:Request,res:Response){
+  async signupVerification(req: Request, res: Response) {
     try {
-      if(req.body.otp===req.app.locals.otp){
-        const user=await this.userCase.newUser(req.app.locals.userData)
-        req.app.locals.userData= null;
-        res.status(user.status).json(user.data)
-      }else{
-        res.status(400).json({ status: false, message: 'Invalid otp' });
+      if (req.body.otp === req.app.locals.otp) {
+        const user = await this.userCase.newUser(req.app.locals.userData);
+        req.app.locals.userData = null;
+        res.status(user.status).json(user.data);
+      } else {
+        res.status(400).json({ error: "Invalid OTP" });
       }
     } catch (error) {
       console.log(error);
-      
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 

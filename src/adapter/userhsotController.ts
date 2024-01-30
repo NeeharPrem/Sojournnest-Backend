@@ -81,12 +81,74 @@ class UserHostController {
         try {
             const Id = req.params.id
             const Data = await this.userhostUsecase.roomData(Id)
+            console.log(Data)
             if (Data) {
-                return res.status(Data.status).json(Data.data)
+                return res.status(Data.status).json(Data)
             }
         } catch (error) {
             console.log(error)
             return res.status(500).json("Internal Server Error")
+        }
+    }
+
+    async roomDataUpdate(req: Request, res: Response) {
+        try {
+            const Id = req.params.id
+            const images = req.files
+            console.log(images)
+            const { name,
+                bedrooms,
+                bathrooms,
+                guests,
+                rent,
+                subdescription,
+                description,
+                latitude,
+                longitude,
+                amenities,
+                state,
+                district,
+                category,
+                }=req.body
+            const roomData = {
+                latitude,
+                longitude,
+                state,
+                district,
+                category,
+                name,
+                bedrooms,
+                bathrooms,
+                amenities,
+                guests,
+                subdescription,
+                description,
+                rent,
+                images,
+            }
+            const Data = await this.userhostUsecase.roomDataUpdate(Id,roomData)
+            console.log(Data)
+            if (Data) {
+                return res.status(Data.status).json(Data)
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal Server Error")
+        }
+    }
+
+    async allListings(req: Request, res: Response) {
+        try {
+            const Data = await this.userhostUsecase.findListings();
+            if (Data) {
+                const { status, data } = Data;
+                return res.status(status).json(data);
+            } else {
+                return res.status(500).json("Internal Server Error");
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json("Internal Server Error");
         }
     }
 }
