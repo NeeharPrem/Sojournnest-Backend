@@ -21,16 +21,12 @@ const controller = new AdminController(admiUseCase);
 
 const router = express.Router();
 
-// Define your routes here
-router.post("/login", (req, res) => controller.login(req, res));
-// router.post("/logout", adminProtect, (req, res) => controller.logout(req, res));
-
 // user action routes
 router.get("/users",(req,res)=>controller.allUsers(req,res))
-router.post("/blockUser/:id",(req,res)=>controller.blockUser(req,res))
+router.post("/users/:id",(req,res)=>controller.blockUser(req,res))
 
 //Listing action routes
 router.get("/listings", (req, res) => controller.allListings(req,res))
-router.post('/approveListing/:id', (req, res) => controller.approveListing(req, res))
-router.post('/blockListing/:id',(req,res)=>controller.blocListing(req,res))
+router.post('/listings/:id', (req, res) => controller.approveListing(req, res))
+router.patch('/listings/:id',(req,res)=>controller.blocListing(req,res))
 export default router;

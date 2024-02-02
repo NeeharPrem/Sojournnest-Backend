@@ -3,8 +3,9 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import user from "../route/userRoute";
-import admin from "../route/adminRoute"
+import userRouter from "../route/userRoute";
+import adminRouter from "../route/adminRoute";
+import authRouter from "../route/authRouter"; 
 // import session from "express-session";
 import http from "http";
 import path from 'path'
@@ -28,8 +29,9 @@ const createServer = () => {
 
     app.use(cookieParser());
     app.options("*", cors());
-    app.use("/api/user", user);
-    app.use("/api/admin", admin);
+    app.use("/api/users", userRouter);
+    app.use("/api/admins", adminRouter);
+    app.use('/api/auth',authRouter)
 
     const server = http.createServer(app);
     initializeSocket(server);

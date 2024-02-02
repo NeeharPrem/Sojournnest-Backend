@@ -5,7 +5,7 @@ import HostRepository from "../repository/HostRepository";
 import Userusecase from "../../use_case/userUsecases";
 import UserHostUsecase from "../../use_case/userhostUsecase";
 import Encrypt from "../passwordRepository/hashpassword";
-import express, { Router } from "express";
+import express  from "express";
 import GenerateOTP from "../utils/generateOtp";
 import jwtPassword from "../passwordRepository/jwtpassword";
 import nodemailerUtils from "../utils/sendMail";
@@ -31,19 +31,20 @@ const hostcontroller= new UserHostController(hostuseCase)
 
 const router=express.Router();
 
-router.post("/signup",(req,res)=>controller.signup(req,res));
-router.post("/signupVerification",(req,res)=>controller.signupVerification(req,res))
-router.post("/login",(req,res)=>controller.login(req,res));
-router.post("/logout",(req,res)=>controller.logout(req,res));
+router.post("/", (req, res) => controller.signup(req, res));
+router.post("/verify-otp", (req, res) => controller.verifyotp(req,res))
 
-router.get("/profile", protect, (req, res) => controller.profile(req, res))
-router.put("/updateProfile", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
+
+router.get("/", protect, (req, res) => controller.profile(req, res))
+router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 
 // host adding rooms
-router.put('/addRoom', ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
-router.get('/getListings',(req,res)=>hostcontroller.getListings(req,res))
-router.post('/unlist/:id',(req,res)=>hostcontroller.unlist(req,res))
-router.get('/roomData/:id', (req, res) => hostcontroller.roomData(req, res))
-router.put('/roomDataUpdate/:id', ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
-router.get('/homeListings', (req, res) => hostcontroller.allListings(req, res))
+router.get('/host/listings',(req,res)=>hostcontroller.getListings(req,res))
+router.put('/host/listings', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
+router.get('/host/listings/:id', protect, (req, res) => hostcontroller.roomData(req, res))
+router.patch('/host/listings/:id', protect,(req,res)=>hostcontroller.unlist(req,res))
+router.put('/host/listings/:id', protect, ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
+
+// getting the listing data
+router.get('/listings', (req, res) => hostcontroller.allListings(req, res))
 export default router
