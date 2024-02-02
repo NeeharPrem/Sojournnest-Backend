@@ -52,7 +52,7 @@ class UserHostController {
     async getListings (req:Request,res:Response){
         try {
             const token = req.cookies.userJWT
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id = decoded.userId
             const Data=await this.userhostUsecase.getListings(Id)
             if(Data){
@@ -81,7 +81,6 @@ class UserHostController {
         try {
             const Id = req.params.id
             const Data = await this.userhostUsecase.roomData(Id)
-            console.log(Data)
             if (Data) {
                 return res.status(Data.status).json(Data)
             }
@@ -95,7 +94,6 @@ class UserHostController {
         try {
             const Id = req.params.id
             const images = req.files
-            console.log(images)
             const { name,
                 bedrooms,
                 bathrooms,
@@ -127,7 +125,6 @@ class UserHostController {
                 images,
             }
             const Data = await this.userhostUsecase.roomDataUpdate(Id,roomData)
-            console.log(Data)
             if (Data) {
                 return res.status(Data.status).json(Data)
             }

@@ -32,7 +32,7 @@ class adminUsercases{
             if(adminData && adminData._id){
                     const passwordMatch = await this.Encrypt.compare(admin.password,adminData.password)
                     if(passwordMatch){
-                       const  token = this.JWTToken.generateToken(adminData._id, 'admin');
+                       const  token = this.JWTToken.generateAccessToken(adminData._id, 'admin');
                        return {
                         status : 200,
                         data:{

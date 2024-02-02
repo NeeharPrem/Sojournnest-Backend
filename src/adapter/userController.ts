@@ -3,6 +3,7 @@ import Userusecase from "../use_case/userUsecases";
 import sendMail from "../infrastructure/utils/sendMail";
 import CloudinarySetup from "../infrastructure/utils/cloudinarySetup";
 import GenerateOTP from "../infrastructure/utils/generateOtp";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 
 class UserController {
@@ -39,7 +40,7 @@ class UserController {
     }
   }
 
-  async signupVerification(req: Request, res: Response) {
+  async verifyotp(req: Request, res: Response) {
     try {
       if (req.body.otp === req.app.locals.otp) {
         const user = await this.userCase.newUser(req.app.locals.userData);
@@ -58,13 +59,22 @@ class UserController {
   try {
     const user = await this.userCase.login(req.body);
     if (user) {
-      res.cookie('userJWT', user.data.token, {
+      console.log(user)
+      res.cookie('userJWT', user.data.accessToken, {
         httpOnly: true,
         sameSite: 'none',
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 30 * 24 * 60 * 60 * 1000
       });
-      res.status(user?.status).json(user.data);
+
+      res.cookie('refreshToken', user.data.refreshToken, {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 30 * 24 * 60 * 60 * 1000 
+      });
+      const { accessToken, refreshToken, ...userData } = user.data;
+      res.status(user?.status).json(userData);
     }
   } catch (err) {
     console.log(err);
@@ -86,8 +96,10 @@ class UserController {
 
   async profile(req: Request, res: Response) {
     try {
-      const userId = req.userId || '';
-      const user = await this.userCase.profile(userId);
+      const token = req.cookies.userJWT
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+      const Id = decoded.userId
+      const user = await this.userCase.profile(Id);
       res.status(user.status).json(user.data);
     } catch (error) {
       const err: Error = error as Error;

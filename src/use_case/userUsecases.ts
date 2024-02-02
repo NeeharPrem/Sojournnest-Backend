@@ -54,7 +54,8 @@ class UserUseCase {
   async login(user: User) {
     try {
       const userData = await this.UserRepository.findByEmail(user.email);
-      let token = '';
+      let accessToken = '';
+      let refreshToken='';
 
       if (userData) {
         if (userData.is_blocked) {
@@ -72,12 +73,14 @@ class UserUseCase {
         if (passwordMatch || userData.is_google) {
           const userId = userData?._id;
           if (userId) {
-            token = this.JWTToken.generateToken(userId, 'user');
+            accessToken = this.JWTToken.generateAccessToken(userId, 'user');
+            refreshToken = this.JWTToken.generateRefreshToken(userId);
             return {
               status: 200,
               data: {
                 message: userData,
-                token
+                accessToken,
+                refreshToken
               }
             };
           }
@@ -86,7 +89,7 @@ class UserUseCase {
             status: 400,
             data: {
               message: 'Invalid email or password!',
-              token
+              accessToken
             }
           };
         }
@@ -95,7 +98,7 @@ class UserUseCase {
           status: 400,
           data: {
             message: 'Invalid email or password!',
-            token
+            accessToken
           }
         };
       }
