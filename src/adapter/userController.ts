@@ -40,9 +40,40 @@ class UserController {
     }
   }
 
+  async resendOtp(req: Request, res: Response) {
+    try {
+      const message ="OTP resent successfully"
+      console.log(req.app.locals.userData)
+      const email = req.app.locals.userData.email
+      const otp = await this.genOtp.generateOtp(4)
+      console.log(otp);
+      let otpObj={
+        otp: otp,
+        timestamp: Date.now()
+      }
+      req.app.locals.otp = otpObj;
+      this.sendMailer.sendVerificationEmail(email, otp);
+      res.status(200).json(message);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
   async verifyotp(req: Request, res: Response) {
     try {
-      if (req.body.otp === req.app.locals.otp) {
+        let otp=req.body.otp
+        let otpObj=req.app.locals.otp
+      if (!otpObj) {
+        return res.status(400).json({ error: "OTP not found or has expired." });
+      }
+
+      const currentTime = Date.now();
+      const oneHour = 60 * 60 * 1000;
+      if (currentTime - otpObj.timestamp > oneHour) {
+        return res.status(400).json({ error: "OTP has expired." });
+      }
+      if (otp === otpObj.otp) {
         const user = await this.userCase.newUser(req.app.locals.userData);
         req.app.locals.userData = null;
         res.status(user.status).json(user.data);

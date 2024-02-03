@@ -33,6 +33,7 @@ const router=express.Router();
 
 router.post("/", (req, res) => controller.signup(req, res));
 router.post("/verify-otp", (req, res) => controller.verifyotp(req,res))
+router.post("/resend-otp", (req, res) => controller.resendOtp(req, res))
 
 
 router.get("/", protect, (req, res) => controller.profile(req, res))
