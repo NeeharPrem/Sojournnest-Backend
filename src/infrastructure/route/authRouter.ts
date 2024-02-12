@@ -12,6 +12,9 @@ import nodemailerUtils from "../utils/sendMail";
 import { protect } from "../middleware/userAuth";
 import CloudinarySetup from "../utils/cloudinarySetup";
 import express from "express";
+import ChatUseCase from "../../use_case/chatUseCase";
+import conversationRepository from "../repository/conversationRepository";
+import MessageRepository from "../repository/messageRespository";
 
 const encrypt = new Encrypt();
 const JWTPassword = new jwtPassword();
@@ -22,11 +25,14 @@ const generateOtp = new GenerateOTP()
 const repository = new userRepository();
 const adminRepository = new AdminRepository();
 const hostRepository = new HostRepository()
+const repositoryChat = new conversationRepository()
+const repositoryMessage = new MessageRepository()
 
 const useCase = new Userusecase(encrypt, repository, JWTPassword)
 const admiUseCase = new AdminUsercases(encrypt, repository, JWTPassword, adminRepository, hostRepository);
+const chatuseCase = new ChatUseCase(repository, repositoryChat, repositoryMessage)
 
-const controller = new userController(useCase, sendMail, cloudinary, generateOtp)
+const controller = new userController(useCase, sendMail, cloudinary, generateOtp, chatuseCase)
 const admincontroller = new AdminController(admiUseCase);
 
 const router = express.Router();
