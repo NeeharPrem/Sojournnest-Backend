@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import UserHostUsecase from "../use_case/userhostUsecase";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import ChatUseCase from "../use_case/chatUseCase";
 
 class UserHostController {
     private userhostUsecase: UserHostUsecase;
+    private chatuseCase: ChatUseCase;
 
-    constructor(userhostUsecase: UserHostUsecase) {
+    constructor(userhostUsecase: UserHostUsecase, chatuseCase: ChatUseCase) {
         this.userhostUsecase = userhostUsecase;
+        this.chatuseCase = chatuseCase
     }
 
     async addRoom(req: Request, res: Response) {
@@ -51,6 +54,7 @@ class UserHostController {
 
     async getListings (req:Request,res:Response){
         try {
+            console.log('ww')
             const token = req.cookies.userJWT
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id = decoded.userId
@@ -80,6 +84,21 @@ class UserHostController {
     async roomData(req: Request, res: Response) {
         try {
             const Id = req.params.id
+            console.log(Id)
+            const Data = await this.userhostUsecase.roomData(Id)
+            if (Data) {
+                return res.status(Data.status).json(Data)
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal Server Error")
+        }
+    }
+
+    async roomDetail(req: Request, res: Response) {
+        try {
+            const Id = req.params.id
+            console.log(Id)
             const Data = await this.userhostUsecase.roomData(Id)
             if (Data) {
                 return res.status(Data.status).json(Data)
@@ -136,6 +155,7 @@ class UserHostController {
 
     async allListings(req: Request, res: Response) {
         try {
+            console.log('1')
             const Data = await this.userhostUsecase.findListings();
             if (Data) {
                 const { status, data } = Data;
@@ -148,6 +168,54 @@ class UserHostController {
             return res.status(500).json("Internal Server Error");
         }
     }
+
+    async newConversation(req: Request, res: Response) {
+        try {
+            const members = [req.body.senderId, req.body.receiverId]
+            const existing = await this.chatuseCase.checkExisting(members)
+            console.log(existing, "");
+            if (!existing?.length) {
+                console.log("entered");
+                const conversation = await this.chatuseCase.newConversation(members)
+                res.status(conversation?.status).json(conversation?.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getConversations(req: Request, res: Response) {
+        try {
+            console.log(req.params.id);
+            const conversations = await this.chatuseCase.getConversations(req.params.id)
+            res.status(conversations.status).json(conversations.data)
+        } catch (error) {
+           console.log(error)
+        }
+    }
+
+    async addMessage(req: Request, res: Response) {
+        try {
+            console.log(req.body);
+            const data = {
+                ...req.body,
+            };
+            const message = await this.chatuseCase.addMessage(data)
+            res.status(message.status).json(message.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getMessages(req: Request, res: Response) {
+        try {
+            const messages = await this.chatuseCase.getMessages(req.params.id)
+            res.status(messages.status).json(messages.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 }
 
 export default UserHostController;
