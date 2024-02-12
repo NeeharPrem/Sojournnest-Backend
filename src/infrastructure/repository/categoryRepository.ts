@@ -2,6 +2,10 @@ import Categories from "../../domain/category";
 import { CategoryModel } from "../database/categoryModel";
 import ICategories from "../../use_case/interface/categoryInterface";
 
+interface EditAmenityData {
+    value: string;
+    index: number;
+}
 
 class CategoryRepository implements ICategories {
     async newEntry(data: Categories): Promise<Categories> {
@@ -59,6 +63,35 @@ class CategoryRepository implements ICategories {
             }
         } catch (error) {
             console.error('An error occurred:', error);
+        }
+    }
+
+    async editEntry(data: EditAmenityData, id: string) {
+        try {
+            const updateObject = { [`category.${data.index}`]: data.value };
+            console.log(updateObject)
+            const result = await CategoryModel.updateOne({ _id: id }, { $set: updateObject });
+            console.log(result)
+            if (result.modifiedCount > 0) {
+                return {
+                    success: true,
+                    message: 'Category updated successfully.',
+                    data: result
+                };
+            } else {
+                return {
+                    success: false,
+                    message: 'No changes made.',
+                    data: result
+                };
+            }
+        } catch (error) {
+            console.error('An error occurred:', error);
+            return {
+                success: false,
+                message: 'An error occurred during the update process.',
+                error: error
+            };
         }
     }
 

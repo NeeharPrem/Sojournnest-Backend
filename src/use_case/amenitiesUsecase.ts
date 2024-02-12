@@ -98,6 +98,30 @@ class AmenitiesUsecase{
             console.log(error)
         }
     }
+
+    async editEntry(data:object, id: string) {
+        try {
+            console.log(data)
+            const Data = await this.IAmenities.editEntry(data, id)
+            if (Data.success == true) {
+                return {
+                    status: 200,
+                    data: {
+                        message: 'Amenity Updated'
+                    }
+                }
+            } else {
+                return {
+                    status: 400,
+                    data: {
+                        message: "Failed to Update"
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 
 export default AmenitiesUsecase

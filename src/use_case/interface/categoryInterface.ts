@@ -5,5 +5,6 @@ interface ICategories {
     findCategory(): Promise<any>;
     updateOne(amenity: Categories, id: string): Promise<any>
     deleteEntry(Data: string, id: string): Promise<any>
+    editEntry(Data: object, id: string): Promise<any>
 }
 export default ICategories

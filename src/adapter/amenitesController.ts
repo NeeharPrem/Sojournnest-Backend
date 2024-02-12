@@ -46,6 +46,19 @@ class AmenityController{
             console.log(error)
         }
     }
+
+    async editEntry(req: Request, res: Response) {
+        try {
+            const id = req.body.id
+            const data = req.body
+            const Data = await this.AmenitiesUsecase.editEntry(data, id)
+            if (Data) {
+                return res.status(Data.status).json(Data.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 
 export default AmenityController
