@@ -43,10 +43,12 @@ router.post('/listings/:id', (req, res) => controller.approveListing(req, res));
 router.patch('/listings/:id',(req,res)=>controller.blocListing(req,res));
 // amenites
 router.get('/amenities', (req, res) => amenityController.findAmenity(req, res));
-router.post('/amenities', (req, res) => amenityController.newEntry(req, res));
+router.put('/amenities', (req, res) => amenityController.newEntry(req, res));
+router.post('/amenities',(req,res)=>amenityController.editEntry(req,res))
 router.patch("/amenities",(req,res)=>amenityController.deleteEntry(req,res))
 //category
 router.get('/category', (req, res) => categoryController.findCategory(req, res));
-router.post('/category', (req, res) => categoryController.newEntry(req, res));
+router.put('/category', (req, res) => categoryController.newEntry(req, res));
 router.patch("/category", (req, res) => categoryController.deleteEntry(req, res))
+router.post("/category", (req, res) => categoryController.editEntry(req, res))
 export default router;
