@@ -172,6 +172,21 @@ class UserUseCase {
     }
   }
 
+  async saveRefreshToken(id: string | undefined,refreshToken:string | undefined) {
+    const User = await this.UserRepository.updateRefreshToken(id,refreshToken);
+    if (User) {
+      return {
+        status: 200,
+        data: User,
+      };
+    } else {
+      return {
+        status: 400,
+        data: "Failed to add Token",
+      };
+    }
+  }
+
 }
 
 export default UserUseCase;
