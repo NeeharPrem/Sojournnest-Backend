@@ -9,6 +9,8 @@ import authRouter from "../route/authRouter";
 // import session from "express-session";
 import http from "http";
 import path from 'path'
+const morgan = require('morgan')
+import initializeSocket from "./socketServer";
 
 
 const createServer = () => {
@@ -16,7 +18,7 @@ const createServer = () => {
     const app = express();
     
     app.use(cors({ origin:'http://localhost:5000', credentials: true }));
-
+    app.use(morgan('dev'));
     app.use(express.json());
     // app.use(
     //   session({
@@ -42,8 +44,4 @@ const createServer = () => {
     throw error;
   }
 };
-const initializeSocket = (server: http.Server) => {
-
-};
-
 export { createServer };
