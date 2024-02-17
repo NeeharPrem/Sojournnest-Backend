@@ -11,6 +11,7 @@ interface User{
     is_google?: boolean;
     is_blocked:boolean,
     is_verified:boolean;
+    refreshToken?: string;
 }
 
 export default User
