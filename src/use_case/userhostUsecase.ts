@@ -1,5 +1,4 @@
 import Room from "../domain/room"
-import HostRepository from "../infrastructure/repository/HostRepository"
 import CloudinarySetup from "../infrastructure/utils/cloudinarySetup"
 import IHostRepo from "./interface/hostRepo"
 
@@ -52,7 +51,7 @@ class UserHostUsecase {
             return {
                 status: 400,
                 data: {
-                    message: "No Room Data Found"
+                    message: "No Listings Added"
                 }
             }
         }
@@ -78,6 +77,24 @@ class UserHostUsecase {
     }
 
     async roomData(id: string) {
+        console.log(id)
+        const roomData = await this.IHostRepo.findById(id)
+        if (roomData) {
+            return {
+                status: 200,
+                data: roomData
+            }
+        } else {
+            return {
+                status: 400,
+                data: {
+                    message: "Failed to get Data"
+                }
+            }
+        }
+    }
+
+    async roomDetail(id: string) {
         const roomData = await this.IHostRepo.findById(id)
         if (roomData) {
             return {
@@ -96,21 +113,15 @@ class UserHostUsecase {
 
     async roomDataUpdate(id: string, roomData: Partial<Room>) {
         console.log("here")
-        if (roomData.images && roomData.images.length > 0) {
-            try {
-                const uploadImages = await Promise.all(
-                    roomData.images.map(async (file: any) => {
-                        const result = await this.CloudinarySetup.upload(file.path, "Hosted-places");
-                        return result?.secure_url;
-                    })
-                );
-                console.log(uploadImages);
-                roomData.images = uploadImages;
-            } catch (error) {
-                console.error("Error uploading images:", error);
-            }
-        }
         try {
+            const uploadImages = await Promise.all(
+                roomData.images.map(async (file: any) => {
+                    const result = await this.CloudinarySetup.upload(file.path, "Hosted-places");
+                    return result?.secure_url;
+                })
+            );
+            console.log(uploadImages)
+            roomData.images = uploadImages
             const updatedData = await this.IHostRepo.findOneAndUpdate({ _id: id }, roomData, { new: true });
             if (updatedData) {
                 return {
@@ -136,9 +147,42 @@ class UserHostUsecase {
         }
     }
 
-    async findListings() {
+    async findListings(search?: string, sort?: string, filters?: any) {
         try {
-            const Data = await this.IHostRepo.findListings()
+            console.log('2');
+            let query: any = {};
+
+            if (search) {
+                query.$or = [
+                    { name: { $regex: search, $options: "i" } },
+                    { state: { $regex: search, $options: "i" } },
+                    { district: { $regex: search, $options: "i" } },
+                ];
+            }
+
+            if (filters) {
+                Object.keys(filters).forEach(key => {
+                    if (key === 'category' && filters[key]) {
+                        query['category'] = filters[key];
+                    } else if (key === 'minPrice' && filters[key] !== undefined) {
+                        if (!query['price']) query['price'] = {};
+                        query['price'].$gte = filters[key];
+                    } else if (key === 'maxPrice' && filters[key] !== undefined) {
+                        if (!query['price']) query['price'] = {};
+                        query['price'].$lte = filters[key];
+                    }
+                });
+            }
+
+            let sortOptions: any = {};
+            // Assuming sorting by 'price' for 'high' and 'low'
+            if (sort) {
+                // Map 'high' to '-price' and 'low' to 'price' for sorting
+                const sortField = 'price'; // Change this to the field you wish to sort by
+                sortOptions[sortField] = sort === 'high' ? -1 : 1;
+            }
+
+            const Data = await this.IHostRepo.findAll(query, sortOptions);
             if (Data) {
                 return {
                     status: 200,
@@ -146,17 +190,22 @@ class UserHostUsecase {
                         info: "listings",
                         data: Data
                     }
-                }
+                };
             } else {
                 return {
                     status: 400,
                     data: "No Location to List"
-                }
+                };
             }
         } catch (error) {
-            console.log(error)
+            console.error(error);
+            return {
+                status: 500,
+                data: "An error occurred while fetching the listings."
+            };
         }
     }
+
 }
 
 export default UserHostUsecase
