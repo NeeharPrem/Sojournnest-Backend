@@ -1,24 +1,61 @@
 import { ConversationModel } from "../database/conversationModel";
 import IConversationRepoInterface from "../../use_case/interface/conversationInterface";
 
+interface Member {
+    userId: string;
+    lastSeen: Date;
+}
+
 class conversationRepository implements IConversationRepoInterface{
 
-    async save(membersArray: Array<string>): Promise<any> {
+    async save(userIds: Array<string>): Promise<any> {
         try {
-            const newconversation = new ConversationModel({ members: membersArray });
-            const save = await newconversation.save();
-            if (save) {
-                return save;
-            } else {
-                return null;
-            }
+            const membersArray: Member[] = userIds.map(userId => ({
+                userId,
+                lastSeen: new Date(),
+            }));
+
+            const newConversation = new ConversationModel({ members: membersArray });
+            return await newConversation.save();
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            throw new Error('Failed to save the conversation.');
         }
     }
-    async findByUserId(id: string): Promise<any> {
 
-        const conversations = await ConversationModel.find({ members: { $in: [id] } })
+
+    async updateUserLastSeen(userId:string,data:Date){
+        try {
+            console.log(userId,data,"dd")
+            const updateResult = await ConversationModel.updateMany(
+                { "members.userId": userId },
+                { $set: { "members.$.lastSeen": data } },
+                { multi: true }
+            );
+            if (updateResult.matchedCount === 0) {
+                return {
+                    status: 404,
+                    data: "User not found in any conversation."
+                };
+            }
+
+            return {
+                status: 200,
+                data: "User's lastSeen updated successfully."
+            };
+        } catch (error) {
+            console.log(error)
+            return {
+                status: 500,
+                data: "Failed to update user's lastSeen."
+            };
+        }
+    }
+
+    async findByUserId(id: string): Promise<any> {
+        console.log(id)
+        const conversations = await ConversationModel.find({ "members.userId": id })
+        console.log(conversations)
         if (conversations) {
             return conversations
         } else {
