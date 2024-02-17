@@ -16,9 +16,8 @@ class ChatUseCase {
        ( this.IConversation = IConversation),
         (this.IMessage = IMessage)
     }
+    
     async newConversation(members: Array<string>) {
-        console.log(members);
-
         const newConversation = await this.IConversation.save(members)
         if (newConversation) {
             return {
@@ -32,6 +31,30 @@ class ChatUseCase {
             }
         }
     }
+
+    // async updateUserLastSeen(userId: string,data:string) {
+    //     try {
+    //         const updateResult = await this.IConversation.updateUserLastSeen(userId,data);
+
+    //         if (updateResult.success) {
+    //             return {
+    //                 status: 200,
+    //                 message: "User's lastSeen updated successfully."
+    //             };
+    //         } else {
+    //             return {
+    //                 status: 404,
+    //                 message: "User not found in any conversation."
+    //             };
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         return {
+    //             status: 500,
+    //             message: "An error occurred while updating user's lastSeen."
+    //         };
+    //     }
+    // }
 
     async checkExisting(members: Array<string>) {
         const isExisting = await this.IConversation.checkExisting(members)
@@ -74,7 +97,7 @@ class ChatUseCase {
         }
     }
 
-    async addMessage(data: { conversationId: string, sender: string, text: string }) {
+    async addMessage(data: { conversationId: string, sender: string, text: string}) {
         try {
             // Fetch conversation by sender's userId
             const conversation = await this.IConversation.findByUserId(data.sender);
