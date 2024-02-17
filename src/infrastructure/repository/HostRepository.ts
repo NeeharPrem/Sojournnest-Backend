@@ -10,7 +10,7 @@ class HostRepository implements IHostRepo {
     }
 
     async findById(_id: any){
-        const Data = await RoomsModel.findById({ _id });
+        const Data = await RoomsModel.findById({ _id }).populate('userId');
         return Data;
     }
 
@@ -18,6 +18,21 @@ class HostRepository implements IHostRepo {
         const Data = await RoomsModel.find({userId:id});
         return Data;
     }
+
+    async findAll(query: any, sortOptions: any) {
+        const defaultConfig = {
+            is_approved: true,
+            is_blocked: false,
+            is_listed: true,
+        };
+        const finalQuery = { ...defaultConfig, ...query };
+
+        // Ensure sortOptions is handled correctly whether it's an object or a string
+        const data = await RoomsModel.find(finalQuery).sort(sortOptions).exec();
+
+        return data;
+    }
+
 
     async findListings(page: number = 1, pageSize: number = 10): Promise<any> {
         try {
