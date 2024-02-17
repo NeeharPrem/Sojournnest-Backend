@@ -4,19 +4,22 @@ import sendMail from "../infrastructure/utils/sendMail";
 import CloudinarySetup from "../infrastructure/utils/cloudinarySetup";
 import GenerateOTP from "../infrastructure/utils/generateOtp";
 import jwt, { JwtPayload } from "jsonwebtoken";
-
+import ChatUseCase from "../use_case/chatUseCase";
+import User from "../domain/user";
 
 class UserController {
   private userCase: Userusecase;
   private sendMailer: sendMail;
   private CloudinarySetup: CloudinarySetup
   private genOtp: GenerateOTP;
+  private chatuseCase:ChatUseCase;
 
-  constructor(userCase: Userusecase, sendMailer: sendMail, CloudinarySetup: CloudinarySetup, genOtp: GenerateOTP) {
+  constructor(userCase: Userusecase, sendMailer: sendMail, CloudinarySetup: CloudinarySetup, genOtp: GenerateOTP, chatuseCase: ChatUseCase) {
     this.userCase = userCase;
     this.sendMailer = sendMailer;
     this.CloudinarySetup =CloudinarySetup;
     this.genOtp= genOtp;
+    this.chatuseCase = chatuseCase
   }
 
   async signup(req: Request, res: Response) {
@@ -91,6 +94,8 @@ class UserController {
     const user = await this.userCase.login(req.body);
     if (user) {
       console.log(user)
+      const id = (user?.data?.message as User)?._id;
+      await this.userCase.saveRefreshToken(id, user.data.refreshToken);
       res.cookie('userJWT', user.data.accessToken, {
         httpOnly: true,
         sameSite: 'none',
@@ -136,6 +141,18 @@ class UserController {
       const err: Error = error as Error;
       res.status(400).json(err.message);
     } 
+  }
+
+  async getUser(req: Request, res: Response) {
+    try {
+     const Id=req.params.id
+     console.log(Id,'in getuser')
+      const user = await this.userCase.profile(Id);
+      res.status(user.status).json(user.data);
+    } catch (error) {
+      const err: Error = error as Error;
+      res.status(400).json(err.message);
+    }
   }
 
   async updateProfile(req: Request, res: Response) {
