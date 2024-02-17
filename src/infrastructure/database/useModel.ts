@@ -11,6 +11,7 @@ interface IUser extends Document {
   is_verified:boolean;
   mobile:string;
   profilePic:string;
+  refreshToken?: string;
 }
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -51,8 +52,15 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
   profilePic:{
     type:String,
     default:"https://res.cloudinary.com/db5rtuzcw/image/upload/fl_attachment/v1/profile-pics/smfqucbsselfp94orxqc"
-  }
-});
+  },
+  refreshToken: {
+    type: String,
+    default: null,
+  },
+},
+  {
+    timestamps: true,
+  });
 
 const UserModel = mongoose.model<IUser>("User", userSchema);
 
