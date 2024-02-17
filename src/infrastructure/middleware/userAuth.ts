@@ -1,8 +1,10 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import userRepository from '../repository/userRepository';
+import JWTToken from '../passwordRepository/jwtpassword';
 
 const userRepo = new userRepository();
+const jwtToken = new JWTToken(); // Assuming JWTToken has a method generateAccessToken
 
 declare global {
     namespace Express {
@@ -14,36 +16,57 @@ declare global {
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies.userJWT;
-
-        if (!token) {
-            console.log('here')
-            return res.status(401).json({ message: "Access Denied" });
+        const accessToken = req.cookies.userJWT;
+        if (!accessToken) {
+            return res.status(401).json({ message: "Access Denied: No access token provided." });
         }
 
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
-        console.log(decoded)
-        if (!decoded || (decoded.role && decoded.role !== 'user')) {
-            return res.status(401).json({ message: 'Not authorized, invalid token' });
-        }
+        let decoded: JwtPayload;
+        try {
+            decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            req.userId = decoded.userId;
 
-        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-        if (decoded.exp && decoded.exp < currentTimeInSeconds) {
-            return res.status(401).json({ message: 'Token has expired' });
-        }
+            const user = await userRepo.findById(decoded.userId);
+            if (!user) {
+                return res.status(401).json({ message: 'Not authorized, user not found' });
+            }
+            if (user.is_blocked) {
+                return res.status(401).json({ message: 'You are blocked by admin!' });
+            }
 
-        const user = await userRepo.findById(decoded.userId as string);
-        if (!user) {
-            return res.status(401).json({ message: 'Not authorized, invalid token' });
-        }
+            next();
+        } catch (err) {
+            if (err instanceof jwt.TokenExpiredError) {
+                const refreshToken = req.cookies.refreshToken;
+                if (!refreshToken) {
+                    return res.status(401).json({ message: "Access Denied: No refresh token provided." });
+                }
 
-        req.userId = user._id;
-        if (user.is_blocked) {
-            return res.status(401).json({ message: 'You are blocked by admin!' });
-        }
+                try {
+                    const decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as JwtPayload;
+                    const user = await userRepo.findById(decodedRefresh.userId);
+                    if (!user || user.refreshToken !== refreshToken) {
+                        return res.status(401).json({ message: 'Not authorized, invalid refresh token' });
+                    }
+                    const newAccessToken = jwtToken.generateAccessToken(decodedRefresh.userId, 'user');
+                    res.cookie('userJWT', newAccessToken, {
+                        httpOnly: true,
+                        sameSite: 'none',
+                        secure: process.env.NODE_ENV !== 'development',
+                        maxAge: 30 * 24 * 60 * 60 * 1000 
+                    });
 
-        next();
+                    req.userId = decodedRefresh.userId;
+                    next();
+                } catch (refreshErr) {
+                    return res.status(401).json({ message: 'Not authorized, invalid refresh token' });
+                }
+            } else {
+                return res.status(401).json({ message: 'Not authorized, invalid access token' });
+            }
+        }
     } catch (error) {
-        return res.status(401).json({ message: 'Not authorized, invalid token' });
+        console.error('Error in protect middleware:', error);
+        return res.status(401).json({ message: 'Not authorized, an error occurred' });
     }
 };
