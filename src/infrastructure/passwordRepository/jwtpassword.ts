@@ -4,7 +4,7 @@ import JWT from '../../use_case/interface/jwt';
 class JWTToken implements JWT {
   generateAccessToken(userId: string, role: string): string {
     const accessKey = process.env.ACCESS_TOKEN_SECRET || "access123456";
-    const expiresIn = '15m'; // 15 minutes
+    const expiresIn = '1d'; // 1 day
     if (accessKey) {
       const accessToken: string = jwt.sign({ userId, role }, accessKey, { expiresIn });
       return accessToken;
