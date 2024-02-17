@@ -15,7 +15,7 @@ class UserHostController {
     async addRoom(req: Request, res: Response) {
         try {
             const token=req.cookies.userJWT
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id=decoded.userId
 
             const {latitude,longitude,state,district,category,name,bedrooms,bathrooms,guests,subdescription,description, rent, amenities}=req.body
@@ -23,6 +23,7 @@ class UserHostController {
                 return res.status(400).json('Missing required fields');
             }
             const images = req.files
+            console.log(images)
             const roomData={
                 userId:Id,
                 latitude,
@@ -58,6 +59,8 @@ class UserHostController {
             const token = req.cookies.userJWT
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id = decoded.userId
+            // const userId = req.userId;
+            // console.log(userId)
             const Data=await this.userhostUsecase.getListings(Id)
             if(Data){
                 return res.status(Data.status).json(Data.data)
@@ -156,7 +159,15 @@ class UserHostController {
     async allListings(req: Request, res: Response) {
         try {
             console.log('1')
-            const Data = await this.userhostUsecase.findListings();
+            const search = req.query.search as string | '';
+            const sort = req.query.sort as string | '';
+            const filter = req.query.filter as string | undefined; 
+            
+            let filters = {};
+            if (filter) {
+                filters = JSON.parse(filter);
+            }
+            const Data = await this.userhostUsecase.findListings(search, sort, filters);
             if (Data) {
                 const { status, data } = Data;
                 return res.status(status).json(data);
@@ -176,6 +187,7 @@ class UserHostController {
             console.log(existing, "");
             if (!existing?.length) {
                 console.log("entered");
+                
                 const conversation = await this.chatuseCase.newConversation(members)
                 res.status(conversation?.status).json(conversation?.data)
             }
@@ -196,7 +208,6 @@ class UserHostController {
 
     async addMessage(req: Request, res: Response) {
         try {
-            console.log(req.body);
             const data = {
                 ...req.body,
             };
