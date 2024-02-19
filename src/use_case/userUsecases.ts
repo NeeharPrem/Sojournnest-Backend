@@ -2,7 +2,6 @@ import User from "../domain/user";
 import Encrypt from "../infrastructure/passwordRepository/hashpassword";
 import UserRepository from "../infrastructure/repository/userRepository";
 import jwtToken from "../infrastructure/passwordRepository/jwtpassword";
-import IHostRepo from "./interface/hostRepo";
 
 class UserUseCase {
   private Encrypt: Encrypt;
