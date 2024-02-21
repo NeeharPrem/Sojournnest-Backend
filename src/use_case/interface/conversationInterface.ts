@@ -1,7 +1,3 @@
-interface Conversation {
-    members: Array<string>;
-
-}
 export default interface IConversationRepoInterface {
     save(conversation: Array<{ memberId: string }>, senderId:string): Promise<any>,
     updateUserLastSeen(id:string,data:Date):Promise<any>,
