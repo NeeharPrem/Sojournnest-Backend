@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 interface Member {
     userId: string;
-    lastSeen: Date;
+    lastSeen?: Date;
 }
 
 interface Conversation extends Document {
@@ -18,7 +18,7 @@ const ConversationSchema = new Schema<Conversation>({
                 },
                 lastSeen: {
                     type: Date,
-                    default: Date.now
+                    required: false
                 }
             }
         ],
