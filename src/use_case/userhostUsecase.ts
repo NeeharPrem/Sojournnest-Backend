@@ -11,7 +11,7 @@ class UserHostUsecase {
         IHostRepo: IHostRepo,
         CloudinarySetup: CloudinarySetup
     ){
-        ; this.IHostRepo = IHostRepo;
+        this.IHostRepo = IHostRepo;
         this.CloudinarySetup = CloudinarySetup;
     }
 
