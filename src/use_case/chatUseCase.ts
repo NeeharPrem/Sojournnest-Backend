@@ -17,8 +17,8 @@ class ChatUseCase {
         (this.IMessage = IMessage)
     }
     
-    async newConversation(members: Array<string>) {
-        const newConversation = await this.IConversation.save(members)
+    async newConversation(members: Array<{ memberId: string }>, senderId:string) {
+        const newConversation = await this.IConversation.save(members, senderId)
         if (newConversation) {
             return {
                 status: 200,
@@ -56,8 +56,9 @@ class ChatUseCase {
     //     }
     // }
 
-    async checkExisting(members: Array<string>) {
-        const isExisting = await this.IConversation.checkExisting(members)
+    async checkExisting(members: Array<{ memberId: string }>,senderId:string) {
+        console.log("2n")
+        const isExisting = await this.IConversation.checkExisting(members,senderId)
         return isExisting
     }
 
