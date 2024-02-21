@@ -3,16 +3,17 @@ import IConversationRepoInterface from "../../use_case/interface/conversationInt
 
 interface Member {
     userId: string;
-    lastSeen: Date;
+    lastSeen?: Date | undefined;
 }
 
 class conversationRepository implements IConversationRepoInterface{
 
-    async save(userIds: Array<string>): Promise<any> {
+    async save(userIds: Array<{ memberId: string }>, senderId: string): Promise<any> {
         try {
-            const membersArray: Member[] = userIds.map(userId => ({
-                userId,
-                lastSeen: new Date(),
+            console.log(senderId,"sender")
+            const membersArray: Member[] = userIds.map(({ memberId }) => ({
+                userId: memberId,
+                lastSeen: memberId === senderId ? new Date() : undefined,
             }));
 
             const newConversation = new ConversationModel({ members: membersArray });
@@ -26,7 +27,6 @@ class conversationRepository implements IConversationRepoInterface{
 
     async updateUserLastSeen(userId:string,data:Date){
         try {
-            console.log(userId,data,"dd")
             const updateResult = await ConversationModel.updateMany(
                 { "members.userId": userId },
                 { $set: { "members.$.lastSeen": data } },
@@ -53,7 +53,6 @@ class conversationRepository implements IConversationRepoInterface{
     }
 
     async findByUserId(id: string): Promise<any> {
-        console.log(id)
         const conversations = await ConversationModel.find({ "members.userId": id })
         console.log(conversations)
         if (conversations) {
@@ -63,16 +62,23 @@ class conversationRepository implements IConversationRepoInterface{
         }
     }
 
-    async checkExisting(members: Array<string>) {
+    async checkExisting(members: Array<{ memberId: string }>) {
+        const queryConditions = members.map(member => ({
+            "members.userId": member.memberId
+        }));
 
-        const conversations = await ConversationModel.find({ members: { $all: [members[0], members[1]] } })
+        const conversations = await ConversationModel.find({
+            $and: queryConditions
+        });
 
-        if (conversations) {
-            return conversations
+        if (conversations.length > 0) {
+            return conversations;
         } else {
-            return null
+            return null;
         }
     }
+
+
 }
 
 export default conversationRepository
