@@ -182,13 +182,16 @@ class UserHostController {
 
     async newConversation(req: Request, res: Response) {
         try {
-            const members = [req.body.senderId, req.body.receiverId]
-            const existing = await this.chatuseCase.checkExisting(members)
-            console.log(existing, "");
+            const senderId = req.body.senderId
+            const members = [
+                { memberId: req.body.senderId },
+                { memberId: req.body.receiverId }
+            ];
+            const existing = await this.chatuseCase.checkExisting(members,senderId)
             if (!existing?.length) {
                 console.log("entered");
                 
-                const conversation = await this.chatuseCase.newConversation(members)
+                const conversation = await this.chatuseCase.newConversation(members, senderId)
                 res.status(conversation?.status).json(conversation?.data)
             }
         } catch (error) {
