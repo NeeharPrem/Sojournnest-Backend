@@ -1,9 +1,11 @@
 import userController from "../../adapter/userController";
 import UserHostController from "../../adapter/userhsotController";
+import BookingController from "../../adapter/bookingController";
 import userRepository from "../repository/userRepository";
 import HostRepository from "../repository/HostRepository";
 import Userusecase from "../../use_case/userUsecases";
 import UserHostUsecase from "../../use_case/userhostUsecase";
+import BookingUsecase from "../../use_case/bookingUsecase";
 import Encrypt from "../passwordRepository/hashpassword";
 import express  from "express";
 import GenerateOTP from "../utils/generateOtp";
@@ -15,6 +17,7 @@ import { ImageUpload } from '../middleware/multer';
 import ChatUseCase from "../../use_case/chatUseCase";
 import conversationRepository from "../repository/conversationRepository";
 import MessageRepository from "../repository/messageRespository";
+import BookingRepository from "../repository/bookingRepository";
 
 
 const encrypt = new Encrypt();
@@ -27,13 +30,16 @@ const repository= new userRepository();
 const repositoryHost= new HostRepository()
 const repositoryChat= new conversationRepository()
 const repositoryMessage=new MessageRepository()
+const repositoryBooking=new BookingRepository()
 
 const useCase=new Userusecase(encrypt,repository,JWTPassword)
 const hostuseCase= new UserHostUsecase(repositoryHost,cloudinary)
 const chatuseCase= new ChatUseCase(repository,repositoryChat,repositoryMessage)
+const bookingUsecase = new BookingUsecase(repositoryBooking)
 
 const controller = new userController(useCase, sendMail, cloudinary, generateOtp, chatuseCase)
 const hostcontroller= new UserHostController(hostuseCase,chatuseCase)
+const bookingcontroller = new BookingController(bookingUsecase)
 
 const router=express.Router();
 
@@ -45,7 +51,7 @@ router.get("/", protect, (req, res) => controller.profile(req, res))
 router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 router.get('/listings/:id',(req, res) => hostcontroller.roomDetail(req, res))
 //user chats
-router.post('/chat', (req, res) => controller.newConversation(req,res))
+// router.post('/chat', (req, res) => controller.newConversation(req,res))
 
 // host 
 router.get('/host/listings',(req,res)=>hostcontroller.getListings(req,res))
@@ -63,5 +69,8 @@ router.get('/host/chat/:id', (req, res) => hostcontroller.getConversations(req, 
 router.post('/host/chat/messages',(req,res)=>hostcontroller.addMessage(req,res))
 router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,res))
 router.get("/:id", (req, res) => controller.getUser(req, res))
+
+//room booking
+router.put('/booking',(req,res)=>bookingcontroller.newBooking(req,res))
 
 export default router
