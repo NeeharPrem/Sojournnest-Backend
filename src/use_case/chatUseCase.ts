@@ -32,32 +32,7 @@ class ChatUseCase {
         }
     }
 
-    // async updateUserLastSeen(userId: string,data:string) {
-    //     try {
-    //         const updateResult = await this.IConversation.updateUserLastSeen(userId,data);
-
-    //         if (updateResult.success) {
-    //             return {
-    //                 status: 200,
-    //                 message: "User's lastSeen updated successfully."
-    //             };
-    //         } else {
-    //             return {
-    //                 status: 404,
-    //                 message: "User not found in any conversation."
-    //             };
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         return {
-    //             status: 500,
-    //             message: "An error occurred while updating user's lastSeen."
-    //         };
-    //     }
-    // }
-
     async checkExisting(members: Array<{ memberId: string }>,senderId:string) {
-        console.log("2n")
         const isExisting = await this.IConversation.checkExisting(members,senderId)
         return isExisting
     }
@@ -100,12 +75,10 @@ class ChatUseCase {
 
     async addMessage(data: { conversationId: string, sender: string, text: string}) {
         try {
-            // Fetch conversation by sender's userId
             const conversation = await this.IConversation.findByUserId(data.sender);
             if (!conversation || conversation.length === 0) {
                 throw new Error('Conversation not found.');
             }
-            // Assume conversation[0] is the correct one to use (ensure logic is valid for your use case)
             const receiverId = conversation[0].members.find((id: string) => id !== data.sender);
             if (!receiverId) {
                 throw new Error('Receiver not found in the conversation.');
@@ -114,7 +87,6 @@ class ChatUseCase {
             if (!message) {
                 return { status: 400, data: "Failed to save message" };
             }
-            // Successful message save
             return { status: 200, data: message };
         } catch (error) {
             console.error('Error adding message:', error);
