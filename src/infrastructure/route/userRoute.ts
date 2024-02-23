@@ -1,11 +1,13 @@
 import userController from "../../adapter/userController";
 import UserHostController from "../../adapter/userhsotController";
 import BookingController from "../../adapter/bookingController";
+import WishlistController from "../../adapter/wishlistController";
 import userRepository from "../repository/userRepository";
 import HostRepository from "../repository/HostRepository";
 import Userusecase from "../../use_case/userUsecases";
 import UserHostUsecase from "../../use_case/userhostUsecase";
 import BookingUsecase from "../../use_case/bookingUsecase";
+import WishlistUsecase from "../../use_case/wishlistUsecase";
 import Encrypt from "../passwordRepository/hashpassword";
 import express  from "express";
 import GenerateOTP from "../utils/generateOtp";
@@ -18,6 +20,7 @@ import ChatUseCase from "../../use_case/chatUseCase";
 import conversationRepository from "../repository/conversationRepository";
 import MessageRepository from "../repository/messageRespository";
 import BookingRepository from "../repository/bookingRepository";
+import wishlistRepository from "../repository/wishlistRepository";
 
 
 const encrypt = new Encrypt();
@@ -31,15 +34,18 @@ const repositoryHost= new HostRepository()
 const repositoryChat= new conversationRepository()
 const repositoryMessage=new MessageRepository()
 const repositoryBooking=new BookingRepository()
+const repositoryWishlist= new wishlistRepository()
 
 const useCase=new Userusecase(encrypt,repository,JWTPassword)
 const hostuseCase= new UserHostUsecase(repositoryHost,cloudinary)
 const chatuseCase= new ChatUseCase(repository,repositoryChat,repositoryMessage)
 const bookingUsecase = new BookingUsecase(repositoryBooking)
+const wishlistUsecase = new WishlistUsecase(repositoryWishlist)
 
 const controller = new userController(useCase, sendMail, cloudinary, generateOtp, chatuseCase)
 const hostcontroller= new UserHostController(hostuseCase,chatuseCase)
 const bookingcontroller = new BookingController(bookingUsecase)
+const whishlistcontroller= new WishlistController(wishlistUsecase)
 
 const router=express.Router();
 
@@ -72,5 +78,10 @@ router.get("/:id", (req, res) => controller.getUser(req, res))
 
 //room booking
 router.put('/booking',(req,res)=>bookingcontroller.newBooking(req,res))
+
+//wishlist
+router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
+router.get('/wishlist/:id', (req, res) => whishlistcontroller.checkExisist(req, res))
+router.patch('/wishlist/:id', (req, res) => whishlistcontroller.removeWishlist(req, res))
 
 export default router
