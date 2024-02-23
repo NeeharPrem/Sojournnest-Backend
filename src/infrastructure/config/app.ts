@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import userRouter from "../route/userRoute";
 import adminRouter from "../route/adminRoute";
 import authRouter from "../route/authRouter"; 
-// import session from "express-session";
 import http from "http";
 import path from 'path'
 const morgan = require('morgan')
@@ -20,13 +19,6 @@ const createServer = () => {
     app.use(cors({ origin:'http://localhost:5000', credentials: true }));
     app.use(morgan('dev'));
     app.use(express.json());
-    // app.use(
-    //   session({
-    //     secret: "your-secret-key",
-    //     resave: false,
-    //     saveUninitialized: true,
-    //   })
-    // );
     app.use(express.static(path.join(__dirname, '../public')));
 
     app.use(cookieParser());
