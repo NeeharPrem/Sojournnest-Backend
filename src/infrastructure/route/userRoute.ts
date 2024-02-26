@@ -77,7 +77,9 @@ router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,r
 router.get("/:id", (req, res) => controller.getUser(req, res))
 
 //room booking
-router.put('/booking',(req,res)=>bookingcontroller.newBooking(req,res))
+router.put('/bookings',(req,res)=>bookingcontroller.newBooking(req,res))
+router.get('/bookings/:id',(req,res)=>bookingcontroller.getBookingdate(req,res))
+router.post('/bookings', (req, res) => bookingcontroller.checkDateAvailability(req,res))
 
 //wishlist
 router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
