@@ -28,5 +28,5 @@ const BookingSchema: Schema = new Schema({
 
 BookingSchema.index({ roomId: 1, checkInDate: 1, checkOutDate: 1 }, { unique: true });
 
-const Booking = mongoose.model<IBooking>('Booking', BookingSchema);
-export default Booking;
+const BookingModal = mongoose.model<IBooking>('Booking', BookingSchema);
+export default BookingModal;
