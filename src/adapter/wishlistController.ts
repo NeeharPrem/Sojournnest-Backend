@@ -38,6 +38,19 @@ class WishlistController{
         }
     }
 
+    async userWishlists(req: Request, res: Response) {
+        try {
+            const token = req.cookies.userJWT
+            const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload
+            const Id = decode.userId
+            const Data = await this.WishlistUsecase.userWishlists(Id)
+            console.log(Data,'userwish')
+            return res.status(200).json(Data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     async removeWishlist(req:Request,res:Response){
         try{
             const roomId=req.params.id
