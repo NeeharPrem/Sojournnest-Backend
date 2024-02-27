@@ -42,21 +42,35 @@ class wishlistRepository implements IWishlist{
     }
 }
 
-async checkExisist(roomId:string,userId:string){
-    try {
-        const roomIdObjectId = new mongoose.Types.ObjectId(roomId);
-        let wishlist = await Wishlist.findOne({ userId: userId });
-        if (wishlist) {
-            const exists = wishlist.roomId.some(id => id.equals(roomIdObjectId));
-            return exists;
-        } else {
-            return false;
+    async checkExisist(roomId:string,Id:string) {
+        try {
+            const roomIdObjectId = new mongoose.Types.ObjectId(roomId);
+            let wishlist = await Wishlist.findOne({ userId: Id });
+            if (wishlist) {
+                const exists = wishlist.roomId.some(id => id.equals(roomIdObjectId));
+                return exists;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error('Something went wrong')
         }
-    } catch (error) {
-        console.log(error)
-        throw new Error('Something went wrong')
     }
-}
+
+    async userWishlists(Id: string) {
+        try {
+            let wishlist = await Wishlist.findOne({ userId: Id }).populate('roomId')
+            if (wishlist) {
+                return wishlist;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error('Something went wrong')
+        }
+    }
 
    async removeWishlist(roomId: string, userId: string) {
     try {
