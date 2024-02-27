@@ -35,12 +35,22 @@ class WishlistUsecase{
 
     async checkExisist(roomId:string,Id:string){
         try {
-            const Data = await this.IWishlist.checkExisist(roomId, Id)
+            const Data = await this.IWishlist.checkExisist(roomId,Id)
             return Data
         } catch (error) {
             console.log(error)
         }
     }
+
+    async userWishlists(Id: string) {
+        try {
+            const Data = await this.IWishlist.userWishlists(Id)
+            return Data
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 
     async removeWishlist(roomId:string,Id:string){
         try {
