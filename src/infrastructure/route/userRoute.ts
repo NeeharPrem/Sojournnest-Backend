@@ -74,7 +74,7 @@ router.post('/host/chat', (req, res) => hostcontroller.newConversation(req, res)
 router.get('/host/chat/:id', (req, res) => hostcontroller.getConversations(req, res))
 router.post('/host/chat/messages',(req,res)=>hostcontroller.addMessage(req,res))
 router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,res))
-router.get("/:id", (req, res) => controller.getUser(req, res))
+
 
 //room booking
 router.put('/bookings',(req,res)=>bookingcontroller.newBooking(req,res))
@@ -83,7 +83,12 @@ router.post('/bookings', (req, res) => bookingcontroller.checkDateAvailability(r
 
 //wishlist
 router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
+router.get('/wishlist', (req, res) => whishlistcontroller.userWishlists(req, res))
 router.get('/wishlist/:id', (req, res) => whishlistcontroller.checkExisist(req, res))
 router.patch('/wishlist/:id', (req, res) => whishlistcontroller.removeWishlist(req, res))
+
+
+// get user
+router.get("/:id", (req, res) => controller.getUser(req, res))
 
 export default router
