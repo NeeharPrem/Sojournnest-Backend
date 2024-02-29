@@ -1,5 +1,13 @@
 import { Request, Response } from "express";
 import BookingUsecase from "../use_case/bookingUsecase";
+import jwt, { JwtPayload } from 'jsonwebtoken'
+
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+    throw new Error("Stripe secret key is not defined");
+}
 
 class BookingController{
     private BookingUsecase:BookingUsecase;
@@ -11,6 +19,63 @@ class BookingController{
     async newBooking(req:Request,res:Response){
         try {
             console.log(req.body)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async payment(req: Request, res: Response) {
+        try {
+            req.app.locals.bookings = req.body;
+            const token = req.cookies.userJWT
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            const Id = decoded.userId
+            req.app.locals.userId=Id
+            const payment = await this.BookingUsecase.Payment(req.body);
+            res.status(200).json(payment?.data);
+        } catch (error) {
+           console.log(error)
+        }
+    }
+
+    async webhook(request: Request, response: Response) {
+        try {
+            const localData = request.app.locals.bookings;
+            const userId = request.app.locals.userId;
+            const Payment = await this.BookingUsecase.PaymentConfirm(request);
+            if (Payment) {
+                const booking = await this.BookingUsecase.addBooking(localData, userId)
+                response.status(200).json(booking?.data);
+            } else {
+                response.status(400).json("Booking failed")
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    async getBookings(req: Request, res: Response) {
+        try {
+            const token = req.cookies.userJWT
+            const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload
+            const Id = decode.userId
+            const Data = await this.BookingUsecase.getBookings(Id)
+            return res.status(Data?.status || 400).json(Data?.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async cancelBooking(req: Request, res: Response) {
+        try {
+            console.log('here')
+            const bookingId= req.params.id
+            const token = req.cookies.userJWT
+            const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload
+            const Id = decode.userId
+            const Data = await this.BookingUsecase.cancelBooking(Id,bookingId)
+            return res.status(Data?.status || 400).json(Data?.data)
         } catch (error) {
             console.log(error)
         }
@@ -29,7 +94,6 @@ class BookingController{
     async checkDateAvailability(req: Request, res: Response) {
         try {
             const { roomId, checkInDate, checkOutDate } = req.body;
-
             const convertDate = (dateString: string) => {
                 const [day, month, year] = dateString.split('/');
                 return new Date(Date.UTC(+year, +month - 1, +day));
