@@ -5,8 +5,8 @@ import IHostRepo from "../../use_case/interface/hostRepo";
 class HostRepository implements IHostRepo {
     async addnewRoom(roomData: Room) {
         const newRoomData = new RoomsModel(roomData)
-        const restaurantRequest = await newRoomData.save()
-        return restaurantRequest
+        const roomsData = await newRoomData.save()
+        return roomsData
     }
 
     async findById(_id: any){
@@ -27,7 +27,6 @@ class HostRepository implements IHostRepo {
         };
         const finalQuery = { ...defaultConfig, ...query };
 
-        // Ensure sortOptions is handled correctly whether it's an object or a string
         const data = await RoomsModel.find(finalQuery).sort(sortOptions).exec();
 
         return data;
