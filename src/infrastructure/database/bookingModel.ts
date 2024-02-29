@@ -9,20 +9,20 @@ export interface IBooking extends Document {
   checkInDate: Date;
   checkOutDate: Date;
   isCancelled: boolean;
-  totalAmount: number;
+  totalAmount: String;
   status: string;
 }
 
 const BookingSchema: Schema = new Schema({
   userId: { type: Schema.Types.ObjectId, required: true, index: true },
-  roomId: { type: Schema.Types.ObjectId, required: true, index: true },
+  roomId: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'Rooms'},
   hostId: { type: Schema.Types.ObjectId, required: true },
   bookingStatus: { type: Boolean, default: true },
   paymentMode: { type: String, required: true },
   checkInDate: { type: Date, required: true },
   checkOutDate: { type: Date, required: true },
   isCancelled: { type: Boolean, default: false },
-  totalAmount: { type: Number, required: true },
+  totalAmount: { type: String, required: true },
   status: { type: String, default: 'pending' },
 }, { timestamps: true });
 
