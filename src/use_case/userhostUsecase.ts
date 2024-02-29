@@ -175,10 +175,8 @@ class UserHostUsecase {
             }
 
             let sortOptions: any = {};
-            // Assuming sorting by 'price' for 'high' and 'low'
             if (sort) {
-                // Map 'high' to '-price' and 'low' to 'price' for sorting
-                const sortField = 'price'; // Change this to the field you wish to sort by
+                const sortField = 'price';
                 sortOptions[sortField] = sort === 'high' ? -1 : 1;
             }
 
