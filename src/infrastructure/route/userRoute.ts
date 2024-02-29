@@ -21,6 +21,7 @@ import conversationRepository from "../repository/conversationRepository";
 import MessageRepository from "../repository/messageRespository";
 import BookingRepository from "../repository/bookingRepository";
 import wishlistRepository from "../repository/wishlistRepository";
+import PaymentRepository from "../repository/paymentRepository";
 
 
 const encrypt = new Encrypt();
@@ -35,11 +36,12 @@ const repositoryChat= new conversationRepository()
 const repositoryMessage=new MessageRepository()
 const repositoryBooking=new BookingRepository()
 const repositoryWishlist= new wishlistRepository()
+const paymentRepository = new PaymentRepository()
 
 const useCase=new Userusecase(encrypt,repository,JWTPassword)
 const hostuseCase= new UserHostUsecase(repositoryHost,cloudinary)
 const chatuseCase= new ChatUseCase(repository,repositoryChat,repositoryMessage)
-const bookingUsecase = new BookingUsecase(repositoryBooking)
+const bookingUsecase = new BookingUsecase(repositoryBooking, paymentRepository)
 const wishlistUsecase = new WishlistUsecase(repositoryWishlist)
 
 const controller = new userController(useCase, sendMail, cloudinary, generateOtp, chatuseCase)
@@ -78,8 +80,12 @@ router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,r
 
 //room booking
 router.put('/bookings',(req,res)=>bookingcontroller.newBooking(req,res))
+router.get('/bookings',(req,res)=>bookingcontroller.getBookings(req,res))
+router.patch('/bookings/:id', (req, res) => bookingcontroller.cancelBooking(req, res))
 router.get('/bookings/:id',(req,res)=>bookingcontroller.getBookingdate(req,res))
-router.post('/bookings', (req, res) => bookingcontroller.checkDateAvailability(req,res))
+router.post('/bookings/check-availability', (req, res) => bookingcontroller.checkDateAvailability(req,res))
+router.post('/bookings', (req, res) => bookingcontroller.payment(req, res))
+router.post('/webhook', (req, res, next) => bookingcontroller.webhook(req, res))
 
 //wishlist
 router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
