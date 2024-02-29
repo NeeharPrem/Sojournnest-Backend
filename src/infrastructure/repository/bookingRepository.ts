@@ -1,13 +1,50 @@
 import Booking from "../../domain/booking";
 import BookingsModal from "../database/bookingModel";
 import IBookingRepo from "../../use_case/interface/bookingRepoInterface";
-import mongoose from "mongoose";
 
 class BookingRepository implements IBookingRepo {
-    async addnewBooking (data:Booking){
-        console.log(data)
+    async addnewBooking (data:any){
+        const newBooking = new BookingsModal(data)
+        const bookingOut = await newBooking.save()
+        return bookingOut
         
     }
+
+    async getBookings(id: string) {
+        try {
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true } }).populate('roomId')
+            return bookings
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getBookingById(Id:string,bookingId:string) {
+        try {
+            console.log(Id,bookingId,"byId")
+            const booking = await BookingsModal.findOne({
+                where: {_id: bookingId, userId: Id }
+            });
+            console.log(booking,"id bok")
+            return booking;
+        } catch (error) {
+            console.error("Error fetching booking by ID:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    async updateBookingStatus(bookingId:string,newstatus:string) {
+        try {
+            console.log("upone")
+            const result = await BookingsModal.updateOne({ status: newstatus,isCancelled: true},{ where: { id: bookingId } }
+            );
+            return result;
+        } catch (error) {
+            console.error("Error updating booking status:", error);
+            throw new Error("Database error");
+        }
+    }
+
 
     async getBookingdate(id:string){
         try {
