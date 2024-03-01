@@ -46,7 +46,6 @@ class UserController {
   async resendOtp(req: Request, res: Response) {
     try {
       const message ="OTP resent successfully"
-      console.log(req.app.locals.userData)
       const email = req.app.locals.userData.email
       const otp = await this.genOtp.generateOtp(4)
       console.log(otp);
@@ -65,18 +64,18 @@ class UserController {
 
   async verifyotp(req: Request, res: Response) {
     try {
+      console.log(req.app.locals.otp,'otploc',req.body.otp,'otpbo')
         let otp=req.body.otp
         let otpObj=req.app.locals.otp
       if (!otpObj) {
         return res.status(400).json({ error: "OTP not found or has expired." });
       }
-
       const currentTime = Date.now();
       const oneHour = 60 * 60 * 1000;
       if (currentTime - otpObj.timestamp > oneHour) {
         return res.status(400).json({ error: "OTP has expired." });
       }
-      if (otp === otpObj.otp) {
+      if (otp === otpObj) {
         const user = await this.userCase.newUser(req.app.locals.userData);
         req.app.locals.userData = null;
         res.status(user.status).json(user.data);
