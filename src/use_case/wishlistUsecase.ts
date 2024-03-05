@@ -45,7 +45,18 @@ class WishlistUsecase{
     async userWishlists(Id: string) {
         try {
             const Data = await this.IWishlist.userWishlists(Id)
-            return Data
+           if(Data){
+            return {
+                status:200,
+                info:true,
+                data:Data
+            }
+           }else{
+            return{
+                status:400,
+                info:false
+            }
+           }
         } catch (error) {
             console.log(error)
         }
