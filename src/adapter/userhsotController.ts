@@ -59,8 +59,6 @@ class UserHostController {
             const token = req.cookies.userJWT
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id = decoded.userId
-            // const userId = req.userId;
-            // console.log(userId)
             const Data=await this.userhostUsecase.getListings(Id)
             if(Data){
                 return res.status(Data.status).json(Data.data)
@@ -158,19 +156,12 @@ class UserHostController {
 
     async allListings(req: Request, res: Response) {
         try {
-            console.log('1')
-            const search = req.query.search as string | '';
-            const sort = req.query.sort as string | '';
-            const filter = req.query.filter as string | undefined; 
-            
-            let filters = {};
-            if (filter) {
-                filters = JSON.parse(filter);
-            }
-            const Data = await this.userhostUsecase.findListings(search, sort, filters);
+            const page = req.query.page;
+            const pageNumber = parseInt(page as string, 10) || 1;
+            const Data = await this.userhostUsecase.findListings(pageNumber);
+
             if (Data) {
-                const { status, data } = Data;
-                return res.status(status).json(data);
+                return res.status(Data.status).json(Data.data);
             } else {
                 return res.status(500).json("Internal Server Error");
             }
@@ -179,6 +170,7 @@ class UserHostController {
             return res.status(500).json("Internal Server Error");
         }
     }
+
 
     async newConversation(req: Request, res: Response) {
         try {
