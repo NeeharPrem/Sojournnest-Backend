@@ -147,52 +147,25 @@ class UserHostUsecase {
         }
     }
 
-    async findListings(search?: string, sort?: string, filters?: any) {
+    async findListings(page: number, pageSize: number = 8) {
         try {
-            console.log('2');
-            let query: any = {};
+            const { data: Data, hasMore } = await this.IHostRepo.findListings(page);
 
-            if (search) {
-                query.$or = [
-                    { name: { $regex: search, $options: "i" } },
-                    { state: { $regex: search, $options: "i" } },
-                    { district: { $regex: search, $options: "i" } },
-                ];
-            }
-
-            if (filters) {
-                Object.keys(filters).forEach(key => {
-                    if (key === 'category' && filters[key]) {
-                        query['category'] = filters[key];
-                    } else if (key === 'minPrice' && filters[key] !== undefined) {
-                        if (!query['price']) query['price'] = {};
-                        query['price'].$gte = filters[key];
-                    } else if (key === 'maxPrice' && filters[key] !== undefined) {
-                        if (!query['price']) query['price'] = {};
-                        query['price'].$lte = filters[key];
-                    }
-                });
-            }
-
-            let sortOptions: any = {};
-            if (sort) {
-                const sortField = 'price';
-                sortOptions[sortField] = sort === 'high' ? -1 : 1;
-            }
-
-            const Data = await this.IHostRepo.findAll(query, sortOptions);
-            if (Data) {
+            if (Data && Data.length > 0) {
                 return {
                     status: 200,
                     data: {
                         info: "listings",
-                        data: Data
+                        data: Data,
+                        hasMore: hasMore
                     }
                 };
             } else {
                 return {
                     status: 400,
-                    data: "No Location to List"
+                    data: {
+                        info: "Nothing to List"
+                    }
                 };
             }
         } catch (error) {
@@ -203,6 +176,7 @@ class UserHostUsecase {
             };
         }
     }
+
 
 }
 
