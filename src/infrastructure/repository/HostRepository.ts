@@ -32,19 +32,21 @@ class HostRepository implements IHostRepo {
         return data;
     }
 
-
-    async findListings(page: number = 1, pageSize: number = 10): Promise<any> {
+    async findListings(page: number, pageSize: number = 8): Promise<any> {
         try {
+            const totalCount = await RoomsModel.countDocuments();
             const listData = await RoomsModel.find({})
                 .populate('userId')
                 .limit(pageSize)
                 .skip((page - 1) * pageSize);
-            return listData;
+            const hasMore = page * pageSize < totalCount;
+            return { data: listData, hasMore };
         } catch (error) {
             console.error(error);
             return null;
         }
     }
+
 
     async findOneAndUpdate(_id: string, update: Partial<Room>): Promise<Room | null> {
         const user = await RoomsModel.findOneAndUpdate(
