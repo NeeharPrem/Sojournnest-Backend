@@ -44,8 +44,7 @@ class WishlistController{
             const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload
             const Id = decode.userId
             const Data = await this.WishlistUsecase.userWishlists(Id)
-            console.log(Data,'userwish')
-            return res.status(200).json(Data)
+            return res.status(Data?.status || 500).json(Data)
         } catch (error) {
             console.log(error)
         }
