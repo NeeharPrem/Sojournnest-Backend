@@ -177,6 +177,53 @@ class UserHostUsecase {
         }
     }
 
+    async blockDate(roomId: string, data: object) {
+        const blockDate = await this.IHostRepo.blockDate(roomId,data)
+        if (blockDate) {
+            return {
+                status: 200,
+                toast:'Dates bloked',
+                data: blockDate
+            }
+        } else {
+            return {
+                status: 400,
+                toast:'Failed to block Date'
+            }
+        }
+    }
+
+    async blockedDates(roomId: string) {
+        const blockDate = await this.IHostRepo.blockedDates(roomId)
+        if (blockDate) {
+            return {
+                status: 200,
+                toast: 'Dates bloked',
+                data: blockDate
+            }
+        } else {
+            return {
+                status: 400,
+                toast: 'Failed to block Date'
+            }
+        }
+    }
+
+    async removeDate(roomId: string, data: object) {
+        const blockDate = await this.IHostRepo.removeDate(roomId, data)
+        if (blockDate) {
+            return {
+                status: 200,
+                toast: 'Dates bloked',
+                data: blockDate
+            }
+        } else {
+            return {
+                status: 400,
+                toast: 'Failed to block Date'
+            }
+        }
+    }
 
 }
 
