@@ -222,6 +222,38 @@ class UserHostController {
         }
     }
 
+    async blockDate(req: Request, res: Response) {
+        try {
+            const roomId = req.params.id
+            const data= req.body
+            const blocked = await this.userhostUsecase.blockDate(roomId,data)
+            res.status(blocked.status).json(blocked.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async blockedDates(req: Request, res: Response) {
+        try {
+            const roomId = req.params.id
+            const blocked = await this.userhostUsecase.blockedDates(roomId)
+            res.status(blocked.status).json(blocked.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async removeDate(req: Request, res: Response) {
+        try {
+            const roomId = req.params.id
+            const data = req.body
+            const unblocked = await this.userhostUsecase.removeDate(roomId, data)
+            res.status(unblocked.status).json(unblocked.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 }
 
 export default UserHostController;
