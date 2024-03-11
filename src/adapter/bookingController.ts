@@ -69,7 +69,6 @@ class BookingController{
 
     async cancelBooking(req: Request, res: Response) {
         try {
-            console.log('here')
             const bookingId= req.params.id
             const token = req.cookies.userJWT
             const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload
