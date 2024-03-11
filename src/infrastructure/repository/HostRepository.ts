@@ -2,6 +2,12 @@ import Room from "../../domain/room";
 import { RoomsModel } from "../database/roomsModel";
 import IHostRepo from "../../use_case/interface/hostRepo";
 
+interface BlockDateData {
+    name:string
+    startDate: Date;
+    endDate: Date;
+}
+
 class HostRepository implements IHostRepo {
     async addnewRoom(roomData: Room) {
         const newRoomData = new RoomsModel(roomData)
@@ -56,6 +62,64 @@ class HostRepository implements IHostRepo {
         );
         return user;
     }
+
+    async blockDate(roomId: string, data: BlockDateData) {
+        try {
+            const existingBlock = await RoomsModel.findOne({
+                _id: roomId,
+                blockedDates: {
+                    $elemMatch: {
+                        name: data.name,
+                        startDate: data.startDate,
+                        endDate: data.endDate
+                    }
+                }
+            });
+            if (existingBlock) {
+                console.log('Blocked date with provided details already exists.');
+                return {error: 'Blocked dates already exists.'};
+            }
+            const updatedRoom = await RoomsModel.findOneAndUpdate(
+                { _id: roomId },
+                { $push: { blockedDates: { startDate: data.startDate, endDate: data.endDate, name: data.name } } },
+                { new: true }
+            );
+
+            return updatedRoom;
+        } catch (error) {
+            console.error('Error blocking date:', error);
+            throw error;
+        }
+    }
+
+    async blockedDates(id: string) {
+        const roomData = await RoomsModel.findById({ _id: id }).select('blockedDates');
+        if (roomData && roomData.blockedDates) {
+            console.log(roomData,'da')
+            return roomData.blockedDates;
+        } else {
+            return [];
+        }
+    }
+
+    async removeDate(roomId: string, data: { index: number }) {
+        try {
+            const room = await RoomsModel.findById(roomId);
+            if (room && data.index >= 0 && data.index < room.blockedDates.length) {
+                room.blockedDates.splice(data.index, 1);
+                const updatedRoom = await room.save();
+                console.log('Blocked date removed successfully.');
+                return updatedRoom;
+            } else {
+                console.log('No room found, or invalid index.');
+                return { error: 'No room found, or invalid index.' };
+            }
+        } catch (error) {
+            console.error('Error unblocking date:', error);
+            throw error;
+        }
+    }
+
 }
 
 export default HostRepository;
