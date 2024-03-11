@@ -20,6 +20,7 @@ interface Rooms extends Document {
     state: string;
     district: string;
     category: string;
+    blockedDates: string[];
 }
 
 const roomsSchema: Schema<Rooms> = new mongoose.Schema({
@@ -97,7 +98,21 @@ const roomsSchema: Schema<Rooms> = new mongoose.Schema({
     is_listed:{
         type:Boolean,
         default:true
-    }
+    },
+    blockedDates: [{
+        name:{
+            type:String,
+            required:true
+        },
+        startDate: {
+            type: Date,
+            required: true,
+        },
+        endDate: {
+            type: Date,
+            required: true,
+        }
+    }]
 },
     {
         timestamps: true,
