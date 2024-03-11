@@ -98,7 +98,12 @@ router.patch('/bookings/:id', (req, res) => bookingcontroller.cancelBooking(req,
 router.get('/bookings/:id',(req,res)=>bookingcontroller.getBookingdate(req,res))
 router.post('/bookings/check-availability', (req, res) => bookingcontroller.checkDateAvailability(req,res))
 router.post('/bookings', (req, res) => bookingcontroller.payment(req, res))
-router.post('/webhook', (req, res, next) => bookingcontroller.webhook(req, res))
+router.post('/webhook', (req, res) => bookingcontroller.webhook(req, res))
+
+//room Date blocking
+router.put('/host/managedate/:id', (req,res) => hostcontroller.blockDate(req,res))
+router.get('/host/managedate/:id',(req,res)=>hostcontroller.blockedDates(req,res))
+router.patch('/host/managedate/:id',(req,res)=>hostcontroller.removeDate(req,res))
 
 //wishlist
 router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
