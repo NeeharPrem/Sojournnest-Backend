@@ -33,6 +33,9 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
             if (user.is_blocked) {
                 return res.status(401).json({ message: 'You are blocked by admin!' });
             }
+            if (!user.is_approved) {
+                return res.status(401).json({ message: 'Account is not approved' });
+            }
 
             next();
         } catch (err) {
