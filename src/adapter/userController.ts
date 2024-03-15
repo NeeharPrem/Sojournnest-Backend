@@ -48,7 +48,6 @@ class UserController {
       const message ="OTP resent successfully"
       const email = req.app.locals.userData.email
       const otp = await this.genOtp.generateOtp(4)
-      console.log(otp);
       let otpObj={
         otp: otp,
         timestamp: Date.now()
@@ -92,7 +91,6 @@ class UserController {
   try {
     const user = await this.userCase.login(req.body);
     if (user) {
-      console.log(user)
       const id = (user?.data?.message as User)?._id;
       await this.userCase.saveRefreshToken(id, user.data.refreshToken);
       res.cookie('userJWT', user.data.accessToken, {
@@ -172,6 +170,23 @@ class UserController {
       res.status(400).json(err.message);
     }
   }
+
+  async uploadId(req: Request, res: Response) {
+    try {
+      const userId = req.params.id
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded. Please upload a file." });
+      }
+      const img = await this.CloudinarySetup.upload(req.file.path, "profile-pics");
+      const imgUrl = img?.secure_url || "";
+      const user = await this.userCase.updateId(userId || '', imgUrl);
+      res.status(user.status).json(user.data);
+    } catch (error) {
+      const err: Error = error as Error;
+      res.status(400).json({ message: err.message });
+    }
+  }
+
 }
 
 export default UserController;
