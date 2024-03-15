@@ -12,20 +12,82 @@ class BookingRepository implements IBookingRepo {
 
     async getBookings(id: string) {
         try {
-            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true } }).populate('roomId')
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'Pending'] }, isCancelled: { $ne: true } }).populate('roomId')
             return bookings
         } catch (error) {
             console.log(error)
         }
     }
 
+    async canceledBookings(id: string) {
+        try {
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['cancelled'] }}).populate('roomId')
+            return bookings
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async upBookings(Id: string, status?: string, page: number = 1, limit: number = 10) {
+        try {
+            let queryCondition: Record<string, any> = { hostId: Id };
+            switch (status) {
+                case 'completed':
+                    queryCondition['checkoutDate'] = { $lt: new Date().toISOString() };
+                    break;
+                case 'upcoming':
+                    queryCondition['status'] = { $in: ['pending', 'confirmed'] };
+                    break;
+                case 'cancelled':
+                    queryCondition['status'] = 'cancelled';
+                    break;
+                case 'all':
+                    break;
+                default:
+                    queryCondition['status'] = status;
+            }
+            const skip = (page - 1) * limit;
+            const bookings = await BookingsModal.find(queryCondition)
+                .populate([{ path: 'userId' }, { path: 'roomId' }])
+                .limit(limit)
+                .skip(skip);
+            const totalDocuments = await BookingsModal.countDocuments(queryCondition);
+            const totalPages = Math.ceil(totalDocuments / limit);
+            return {
+                data: bookings,
+                pagination: {
+                    totalDocuments,
+                    totalPages,
+                    currentPage: page,
+                    limit
+                }
+            };
+        } catch (error) {
+            console.log(error);
+            return { data: [], pagination: {} };
+        }
+    }
+
+    async hostCancelBookings(id: string) {
+    try {
+        const booking = await BookingsModal.findById(id);
+        if (!booking) {
+            console.log("Booking not found");
+            return;
+        }
+        booking.cancelledRole = booking.cancelReq ? 'User' : 'Host';
+        booking.status = 'cancelled';
+        booking.isCancelled= true;
+        const updatedBooking = await booking.save();
+        return updatedBooking;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
     async getBookingById(Id:string,bookingId:string) {
         try {
-            console.log(Id,bookingId,"byId")
-            const booking = await BookingsModal.findOne({
-                where: {_id: bookingId, userId: Id }
-            });
-            console.log(booking,"id bok")
+            const booking = await BookingsModal.findOne({ _id: bookingId, userId:Id });
             return booking;
         } catch (error) {
             console.error("Error fetching booking by ID:", error);
@@ -35,8 +97,9 @@ class BookingRepository implements IBookingRepo {
 
     async updateBookingStatus(bookingId:string,newstatus:string) {
         try {
-            console.log("upone")
-            const result = await BookingsModal.updateOne({ status: newstatus,isCancelled: true},{ where: { id: bookingId } }
+            const result = await BookingsModal.updateOne(
+                { _id: bookingId },
+                { $set: { status: newstatus, isCancelled: true } }
             );
             return result;
         } catch (error) {
