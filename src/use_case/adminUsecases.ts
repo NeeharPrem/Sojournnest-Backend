@@ -109,9 +109,32 @@ class adminUsercases{
         }
     }
 
+    async approveUser(id: string) {
+        try {
+            const Data = await this.IUserRepo.findById(id)
+            console.log(Data,'data')
+            if (Data) {
+                const update = { is_approved: !Data.is_approved }
+                await this.IUserRepo.findOneAndUpdate(id, update)
+                return {
+                    status: 200,
+                    data: update
+                }
+            } else {
+                return {
+                    status: 400,
+                    data: "Failed to Approve"
+                }
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     async findListings() {
         try {
-            const Data = await this.IHostRepo.findListings()
+            const Data = await this.IHostRepo.findListings(1)
             if (Data) {
                 return {
                     status: 200,
