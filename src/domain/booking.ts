@@ -10,8 +10,8 @@ interface Booking{
     paymentMode:string;
     bookingStatus:boolean;
     status:string;
-    checkInDate:Date;
-    checkOutDate:Date;
+    checkInDate:string;
+    checkOutDate:string;
 }
 
 export default Booking
