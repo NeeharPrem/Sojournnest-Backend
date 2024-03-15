@@ -1,4 +1,5 @@
 interface User{
+    [x: string]: any;
     toObject: any;
     _id?:string;
     fname:string;
