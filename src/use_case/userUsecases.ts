@@ -136,6 +136,7 @@ class UserUseCase {
       lname: user.lname,
       mobile: user.mobile,
       profilePic: user.profilePic,
+      verifyId:user.verifyId
     });
 
     if (userData) {
@@ -160,6 +161,24 @@ class UserUseCase {
       }
 
       return {
+        status: 200,
+        data: userData,
+      };
+    } else {
+      return {
+        status: 400,
+        data: { message: 'User not found' },
+      };
+    }
+  }
+
+  async updateId(id: string, verifyId:string) {
+    console.log(id,'idd')
+    const userData = await this.UserRepository.findOneAndUpdate(id, {
+      verifyId:verifyId
+    });
+    if (userData) {
+        return {
         status: 200,
         data: userData,
       };
