@@ -9,8 +9,10 @@ interface IUser extends Document {
   is_blocked:boolean;
   is_google:boolean;
   is_verified:boolean;
+  is_approved:boolean;
   mobile:string;
   profilePic:string;
+  verifyId:string;
   refreshToken?: string;
 }
 
@@ -46,12 +48,20 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  is_approved: {
+    type: Boolean,
+    default: false,
+  },
   mobile:{
     type:String,
   },
   profilePic:{
     type:String,
     default:"https://res.cloudinary.com/db5rtuzcw/image/upload/fl_attachment/v1/profile-pics/smfqucbsselfp94orxqc"
+  },
+  verifyId:{
+    type:String,
+    default:''
   },
   refreshToken: {
     type: String,
