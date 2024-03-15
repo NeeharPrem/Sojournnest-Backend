@@ -68,25 +68,26 @@ const router=express.Router();
 router.post("/", (req, res) => controller.signup(req, res));
 router.post("/verify-otp", (req, res) => controller.verifyotp(req,res))
 router.post("/resend-otp", (req, res) => controller.resendOtp(req, res))
-router.get("/", protect, (req, res) => controller.profile(req, res))
+router.get("/",(req, res) => controller.profile(req, res))
 router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
+router.put("/:id",ImageUpload.single('verifyId'), (req, res) => controller.uploadId(req, res))
 router.get('/listings/:id',(req, res) => hostcontroller.roomDetail(req, res))
 //user chats
 // router.post('/chat', (req, res) => controller.newConversation(req,res))
 
 // host 
-router.get('/host/listings',(req,res)=>hostcontroller.getListings(req,res))
-router.put('/host/listings', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
-router.get('/host/listings/:id', protect, (req, res) => hostcontroller.roomData(req, res))
-router.patch('/host/listings/:id', protect,(req,res)=>hostcontroller.unlist(req,res))
-router.put('/host/listings/:id', protect, ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
+router.get('/host/listings', (req,res)=>hostcontroller.getListings(req,res))
+router.put('/host/listings', ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
+router.get('/host/listings/:id', (req, res) => hostcontroller.roomData(req, res))
+router.patch('/host/listings/:id', (req,res)=>hostcontroller.unlist(req,res))
+router.put('/host/listings/:id', ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
 
 // getting the listing data
 router.get('/listings', (req, res) => hostcontroller.allListings(req, res));
 
 // host chat
-router.post('/host/chat', (req, res) => hostcontroller.newConversation(req, res))
-router.get('/host/chat/:id', (req, res) => hostcontroller.getConversations(req, res))
+router.post('/host/chat',(req, res) => hostcontroller.newConversation(req, res))
+router.get('/host/chat/:id',(req, res) => hostcontroller.getConversations(req, res))
 router.post('/host/chat/messages',(req,res)=>hostcontroller.addMessage(req,res))
 router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,res))
 
@@ -94,20 +95,25 @@ router.get('/host/chat/messages/:id',(req,res)=>hostcontroller.getMessages(req,r
 //room booking
 router.put('/bookings',(req,res)=>bookingcontroller.newBooking(req,res))
 router.get('/bookings',(req,res)=>bookingcontroller.getBookings(req,res))
-router.patch('/bookings/:id', (req, res) => bookingcontroller.cancelBooking(req, res))
+router.get('/bookings/cancelled', (req, res) => bookingcontroller.canceledBookings(req, res))
+router.patch('/bookings/:id',(req, res) => bookingcontroller.cancelBooking(req, res))
 router.get('/bookings/:id',(req,res)=>bookingcontroller.getBookingdate(req,res))
 router.post('/bookings/check-availability', (req, res) => bookingcontroller.checkDateAvailability(req,res))
-router.post('/bookings', (req, res) => bookingcontroller.payment(req, res))
+router.post('/bookings',(req, res) => bookingcontroller.payment(req, res))
 router.post('/webhook', (req, res) => bookingcontroller.webhook(req, res))
 
+//host managing booking
+router.get('/host/bookings',(req,res)=>bookingcontroller.upBookings(req,res))
+router.patch('/host/bookings/:id', (req, res) => bookingcontroller.hostCancelBookings(req, res))
+
 //room Date blocking
-router.put('/host/managedate/:id', (req,res) => hostcontroller.blockDate(req,res))
-router.get('/host/managedate/:id',(req,res)=>hostcontroller.blockedDates(req,res))
+router.put('/host/managedate/:id',(req,res) => hostcontroller.blockDate(req,res))
+router.get('/host/managedate/:id', (req,res)=>hostcontroller.blockedDates(req,res))
 router.patch('/host/managedate/:id',(req,res)=>hostcontroller.removeDate(req,res))
 
 //wishlist
 router.put('/wishlist/:id', (req, res) => whishlistcontroller.addTowishlist(req,res))
-router.get('/wishlist', (req, res) => whishlistcontroller.userWishlists(req, res))
+router.get('/wishlist',(req, res) => whishlistcontroller.userWishlists(req, res))
 router.get('/wishlist/:id', (req, res) => whishlistcontroller.checkExisist(req, res))
 router.patch('/wishlist/:id', (req, res) => whishlistcontroller.removeWishlist(req, res))
 
