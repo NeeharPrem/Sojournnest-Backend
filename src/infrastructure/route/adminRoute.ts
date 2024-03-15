@@ -36,6 +36,7 @@ const router = express.Router();
 // user action routes
 router.get("/users",(req,res)=>controller.allUsers(req,res));
 router.post("/users/:id",(req,res)=>controller.blockUser(req,res));
+router.patch("/users/:id", (req, res) => controller.approveUser(req, res));
 
 //Listing action routes
 router.get("/listings", (req, res) => controller.allListings(req,res));
