@@ -64,6 +64,17 @@ class AdminController{
         }
     }
 
+    async approveUser(req: Request, res: Response) {
+        try {
+            console.log(req?.params.id,"id")
+            const Data = await this.adminUsecase.approveUser(req?.params.id)
+            return res.status(200).json(Data?.data)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json("Internal server Error")
+        }
+    }
+
     async allListings(req: Request, res: Response) {
         try {
             const Data = await this.adminUsecase.findListings();
