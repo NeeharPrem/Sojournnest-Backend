@@ -17,7 +17,7 @@ class adminUsercases{
         IUserRepo: IUserRepo,
         JWTToken: jwtToken,
         IAdminRepo: IAdminRepo,
-        IHostRepo: IHostRepo
+        IHostRepo: IHostRepo,
     ){
         (this.Encrypt=Encrypt),
         (this.JWTToken= JWTToken),
