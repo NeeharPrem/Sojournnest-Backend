@@ -110,6 +110,5 @@ class AdminController{
             return res.status(500).json('Internal server Error')
         }
     }
-
 }
 export default AdminController
