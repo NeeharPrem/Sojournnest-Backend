@@ -2,6 +2,7 @@ import Booking from "../../domain/booking"
 
 interface IBookingRepo{
     addnewBooking(Data: any):Promise<any>
+    allbookings(page:number,limit:number):Promise<any>;
     getBookings(Id:string):Promise<any>
     canceledBookings(Id: string): Promise<any>
     upBookings(Id: string,status:string): Promise<any>
