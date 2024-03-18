@@ -247,6 +247,28 @@ class BookingUsecase{
             }
         }
     }
+
+    // all bookings for admin
+    async allbookings(page:number,limit:number) {
+        try {
+            const Data = await this.IBooking.allbookings(page,limit)
+            if (Data.data.length > 0) {
+                return {
+                    status: 200,
+                    data: Data
+                }
+            } else {
+                return {
+                    status: 400,
+                    data: {
+                        message: "No Bookings"
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 
 export default BookingUsecase
