@@ -151,6 +151,22 @@ class BookingController{
         }
     }
 
+    async allbookings(req: Request, res: Response) {
+        try {
+            const page = parseInt((req.query.page as string) || '1', 10);
+            const limit = parseInt((req.query.limit as string) || '10', 10);
+            const Data = await this.BookingUsecase.allbookings(page,limit);
+            if (Data) {
+                const { status, data } = Data;
+                return res.status(status).json(data);
+            } else {
+                return res.status(500).json("Internal Server Error");
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json("Internal Server Error");
+        }
+    }
 }
 
 export default BookingController
