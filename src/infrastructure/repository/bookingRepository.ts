@@ -160,5 +160,23 @@ class BookingRepository implements IBookingRepo {
             console.log(error)
         }
     }
+
+    async allbookings(page = 1, limit = 10): Promise<any> {
+    try {
+        const bookings = await BookingsModal.find({})
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate({ path: 'userId', select: 'fname lname' })
+            .populate({ path: 'hostId', select: 'fname lname' })
+            .populate({ path: 'roomId', select: 'name' });
+
+            const total = await BookingsModal.countDocuments();
+            return { data: bookings, total };
+    } catch (error) {
+        console.log(error);
+        return { data: [], total: 0 };
+    }
+}
+
 }
 export default BookingRepository
