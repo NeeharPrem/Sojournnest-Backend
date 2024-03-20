@@ -17,7 +17,7 @@ interface Room {
     latitude: number;
     description: string;
     userId: ObjectId;
-    rent: string;
+    rent: number;
     state: string;
     district: string;
     category: string;
