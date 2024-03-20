@@ -44,7 +44,8 @@ class BookingController{
             const userId = request.app.locals.userId;
             const Payment = await this.BookingUsecase.PaymentConfirm(request);
             if (Payment) {
-                const booking = await this.BookingUsecase.addBooking(localData, userId)
+                const chargeId = request.app.locals.chargeId;
+                const booking = await this.BookingUsecase.addBooking(localData, userId, chargeId)
                 response.status(200).json(booking?.data);
             } else {
                 response.status(400).json("Booking failed")
