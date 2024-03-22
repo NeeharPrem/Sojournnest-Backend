@@ -10,7 +10,6 @@ const stripe = new Stripe(stripeSecretKey);
 
 class PaymentRepository {
     async ConfirmPayment(data: any) {
-        console.log(data, "Reached payment");
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -36,9 +35,9 @@ class PaymentRepository {
 
     async PaymentSuccess(request: any) {
         const payload = request.body;
+        const paymentIntentId= payload?.data?.object?.payment_intent
         const payloadString = JSON.stringify(payload, null, 2);
         const sig = request.headers["stripe-signature"];
-
         if (typeof sig !== "string") {
             return false;
         }
@@ -56,13 +55,61 @@ class PaymentRepository {
             header,
             endpointSecret
         );
-        console.log(`Webhook Verified: `, event);
+
+        if (paymentIntentId){
+            const paymentIntentResponse = await stripe.paymentIntents.retrieve(paymentIntentId);
+            console.log(paymentIntentResponse,"looo")
+            const paymentIntent = paymentIntentResponse
+            if (paymentIntentResponse.latest_charge) {
+                const chargeId = paymentIntentResponse.latest_charge;
+                console.log(chargeId,'from')
+                request.app.locals.chargeId = chargeId;
+            } else {
+                console.log('No latest charge found for this PaymentIntent.');
+                return null;
+            }
+        }
         if (event.type == "checkout.session.completed") {
             return true;
         } else {
             return false;
         }
     }
+    
+    async createRefund(chargeId: string, refundAmount: number) {
+        try {
+            const refund = await stripe.refunds.create({
+                charge: chargeId,
+                amount: refundAmount,
+            });
+            return refund;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    async retrieveRefund(refundId: string) {
+        try {
+            const refund = await stripe.refunds.retrieve(refundId);
+            console.log(refund);
+            return refund;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async cancelRefund(refundId: string) {
+        try {
+            const refund = await stripe.refunds.cancel(refundId);
+            console.log(refund);
+            return refund;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
 }
 
 export default PaymentRepository;
