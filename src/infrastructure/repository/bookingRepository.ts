@@ -1,6 +1,7 @@
 import Booking from "../../domain/booking";
 import BookingsModal from "../database/bookingModel";
 import IBookingRepo from "../../use_case/interface/bookingRepoInterface";
+import mongoose from "mongoose";
 
 class BookingRepository implements IBookingRepo {
     async addnewBooking (data:any){
@@ -12,7 +13,7 @@ class BookingRepository implements IBookingRepo {
 
     async getBookings(id: string) {
         try {
-            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'Pending'] }, isCancelled: { $ne: true } }).populate('roomId')
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true } }).populate('roomId')
             return bookings
         } catch (error) {
             console.log(error)
@@ -31,9 +32,10 @@ class BookingRepository implements IBookingRepo {
     async upBookings(Id: string, status?: string, page: number = 1, limit: number = 10) {
         try {
             let queryCondition: Record<string, any> = { hostId: Id };
+            
             switch (status) {
                 case 'completed':
-                    queryCondition['checkoutDate'] = { $lt: new Date().toISOString() };
+                    queryCondition['status']='completed'
                     break;
                 case 'upcoming':
                     queryCondition['status'] = { $in: ['pending', 'confirmed'] };
@@ -46,8 +48,9 @@ class BookingRepository implements IBookingRepo {
                 default:
                     queryCondition['status'] = status;
             }
+            console.log(queryCondition, 'sts')
             const skip = (page - 1) * limit;
-            const bookings = await BookingsModal.find(queryCondition)
+            const bookings = await BookingsModal.find({queryCondition})
                 .populate([{ path: 'userId' }, { path: 'roomId' }])
                 .limit(limit)
                 .skip(skip);
@@ -85,6 +88,29 @@ class BookingRepository implements IBookingRepo {
     }
 }
 
+    async hostupdateBookingStatus(bookingId: string, refundId: string) {
+        try {
+            const result = await BookingsModal.updateOne(
+                { _id: bookingId },
+                { $set: { refundId: refundId } }
+            );
+            return result;
+        } catch (error) {
+            console.error("Error updating booking status:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    async createdTime(Id: string, bookingId: string) {
+        try {
+            const booking = await BookingsModal.findOne({ _id: bookingId, userId: Id }).select('createdAt')
+            return booking;
+        } catch (error) {
+            console.error("Error fetching booking by ID:", error);
+            throw new Error("Database error");
+        }
+    }
+
     async getBookingById(Id:string,bookingId:string) {
         try {
             const booking = await BookingsModal.findOne({ _id: bookingId, userId:Id });
@@ -95,11 +121,21 @@ class BookingRepository implements IBookingRepo {
         }
     }
 
-    async updateBookingStatus(bookingId:string,newstatus:string) {
+    async checkBookingById(Id: string) {
+        try {
+            const booking = await BookingsModal.findOne({ _id:Id})
+            return booking;
+        } catch (error) {
+            console.error("Error fetching booking by ID:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    async updateBookingStatus(bookingId:string,refundType:string) {
         try {
             const result = await BookingsModal.updateOne(
                 { _id: bookingId },
-                { $set: { status: newstatus, isCancelled: true } }
+                { $set: {refundType: refundType, cancelReq: true} }
             );
             return result;
         } catch (error) {
@@ -177,6 +213,147 @@ class BookingRepository implements IBookingRepo {
         return { data: [], total: 0 };
     }
 }
+
+    async bookingAndreview(roomId: string,Id:string) {
+        try {
+            const bookings = await BookingsModal.find({ userId: Id, roomId: roomId, status: 'completed', isCancelled: { $ne: true } })
+            return bookings
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async hostReviewcheck(hostId: string, Id: string) {
+        try {
+            const bookings = await BookingsModal.find({ userId: Id, hostId: hostId, status: 'completed', isCancelled: { $ne: true } })
+            return bookings
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async dashboard(id: string) {
+        try {
+            const now = new Date();
+            const matchHostId = { $match: { hostId: new mongoose.Types.ObjectId(id) } };
+
+            const monthlyRevenueAndBookingsAggregation = [
+                matchHostId,
+                { $match: { status: "completed" } },
+                {
+                    $group: {
+                        _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+                        monthlyRevenue: { $sum: "$totalAmount" },
+                        totalBookings: { $sum: 1 },
+                    },
+                },
+                { $sort: { "_id.year": 1, "_id.month": 1 } },
+            ];
+
+            const totalEarningsAggregation = [
+                matchHostId,
+                { $group: { _id: null, totalEarnings: { $sum: "$totalAmount" } } },
+            ];
+
+            const totalBookingsAggregation = [
+                matchHostId,
+                { $group: { _id: null, totalBookings: { $sum: 1 } } },
+            ];
+
+            const upcomingReservationsAggregation = [
+                matchHostId,
+                { $match: { status: { $in: ["pending", "confirmed"] }, checkOutDate: { $gte: now } } },
+                { $group: { _id: null, totalUpcomingReservations: { $sum: 1 } } },
+            ];
+
+            const [
+                monthlyRevenueResult,
+                totalEarningsResult,
+                totalBookingsResult,
+                upcomingReservationsResult
+            ] = await Promise.all([
+                BookingsModal.aggregate(monthlyRevenueAndBookingsAggregation as any[]),
+                BookingsModal.aggregate(totalEarningsAggregation as any[]),
+                BookingsModal.aggregate(totalBookingsAggregation as any[]),
+                BookingsModal.aggregate(upcomingReservationsAggregation as any[]),
+            ]);
+
+            const monthlyRevenue = monthlyRevenueResult.map(item => ({
+                year: item._id.year,
+                month: item._id.month,
+                monthlyRevenue: item.monthlyRevenue,
+                totalBookings: item.totalBookings,
+            }));
+
+            const totalEarnings = totalEarningsResult.length > 0 ? totalEarningsResult[0].totalEarnings : 0;
+            const totalBookings = totalBookingsResult.length > 0 ? totalBookingsResult[0].totalBookings : 0;
+            const totalUpcomingReservations = upcomingReservationsResult.length > 0 ? upcomingReservationsResult[0].totalUpcomingReservations : 0;
+
+            return { monthlyRevenue, totalEarnings, totalBookings, totalUpcomingReservations };
+        } catch (error) {
+            console.error("Error in dashboard function:", error);
+            throw error;
+        }
+    }
+
+    // admin dashboard
+    async adminDashboard() {
+        try {
+            const now = new Date();
+            const monthlyRevenueAndBookingsAggregation = [
+                { $match: { status: "completed" } },
+                {
+                    $group: {
+                        _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+                        monthlyRevenue: { $sum: "$serviceFee" },
+                        totalBookings: { $sum: 1 },
+                    },
+                },
+                { $sort: { "_id.year": 1, "_id.month": 1 } },
+            ];
+
+            const totalEarningsAggregation = [
+                { $group: { _id: null, totalEarnings: { $sum: "$serviceFee" } } },
+            ];
+
+            const totalBookingsAggregation = [
+                { $group: { _id: null, totalBookings: { $sum: 1 } } },
+            ];
+
+            const upcomingReservationsAggregation = [
+                { $match: { status: { $in: ["pending", "confirmed"] }, checkOutDate: { $gte: now } } },
+                { $group: { _id: null, totalUpcomingReservations: { $sum: 1 } } },
+            ];
+
+            const [
+                monthlyRevenueResult,
+                totalEarningsResult,
+                totalBookingsResult,
+                upcomingReservationsResult
+            ] = await Promise.all([
+                BookingsModal.aggregate(monthlyRevenueAndBookingsAggregation as any[]),
+                BookingsModal.aggregate(totalEarningsAggregation as any[]),
+                BookingsModal.aggregate(totalBookingsAggregation as any[]),
+                BookingsModal.aggregate(upcomingReservationsAggregation as any[]),
+            ]);
+
+            const monthlyRevenue = monthlyRevenueResult.map(item => ({
+                year: item._id.year,
+                month: item._id.month,
+                monthlyRevenue: item.monthlyRevenue,
+                totalBookings: item.totalBookings,
+            }));
+
+            const totalEarnings = totalEarningsResult.length > 0 ? totalEarningsResult[0].totalEarnings : 0;
+            const totalBookings = totalBookingsResult.length > 0 ? totalBookingsResult[0].totalBookings : 0;
+            const totalUpcomingReservations = upcomingReservationsResult.length > 0 ? upcomingReservationsResult[0].totalUpcomingReservations : 0;
+
+            return { monthlyRevenue, totalEarnings, totalBookings, totalUpcomingReservations };
+        } catch (error) {
+            console.error("Error in dashboard function:", error);
+            throw error;
+        }
+    }
 
 }
 export default BookingRepository
