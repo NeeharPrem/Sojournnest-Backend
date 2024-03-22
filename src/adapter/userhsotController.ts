@@ -2,14 +2,17 @@ import { Request, Response } from "express";
 import UserHostUsecase from "../use_case/userhostUsecase";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import ChatUseCase from "../use_case/chatUseCase";
+import paymentUsecase from "../use_case/paymentUsecase";
 
 class UserHostController {
     private userhostUsecase: UserHostUsecase;
     private chatuseCase: ChatUseCase;
+    private paymentUsecase: paymentUsecase;
 
-    constructor(userhostUsecase: UserHostUsecase, chatuseCase: ChatUseCase) {
+    constructor(userhostUsecase: UserHostUsecase, chatuseCase: ChatUseCase, paymentUsecase: paymentUsecase) {
         this.userhostUsecase = userhostUsecase;
         this.chatuseCase = chatuseCase
+        this.paymentUsecase = paymentUsecase
     }
 
     async addRoom(req: Request, res: Response) {
@@ -18,12 +21,29 @@ class UserHostController {
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id=decoded.userId
 
-            const {latitude,longitude,state,district,category,name,bedrooms,bathrooms,guests,subdescription,description, rent, amenities}=req.body
-            if (!latitude || !longitude || !state || !district || !category || !name || !bedrooms || !bathrooms || !guests || !subdescription || !description || !rent) {
+            const setOut = await this.paymentUsecase.LatestFee();
+            let serviceFeePercentage = setOut.serviceFee
+            const defaultServiceFeePercentage = 10;
+            serviceFeePercentage = (typeof serviceFeePercentage === 'number' && !isNaN(serviceFeePercentage)) ? serviceFeePercentage : defaultServiceFeePercentage;
+
+            const { latitude, longitude, state, district, category, name, bedrooms, bathrooms, guests, subdescription, description, rent: rentStr, amenities}=req.body
+            if (!latitude || !longitude || !state || !district || !category || !name || !bedrooms || !bathrooms || !guests || !subdescription || !description || !rentStr || !serviceFeePercentage) {
                 return res.status(400).json('Missing required fields');
             }
+
+            let rent = parseFloat(rentStr);
+            if (isNaN(rent)) {
+                console.error('Rent conversion error, received:', rentStr);
+                return res.status(400).json('Invalid rent value');
+            }
+
+            const calculatedRent = !isNaN(serviceFeePercentage) ? rent + (rent * serviceFeePercentage / 100) : rent;
+            if (isNaN(calculatedRent)) {
+                console.error('Calculated rent resulted in NaN. Rent:', rent, 'Service Fee Percentage:', serviceFeePercentage);
+                return res.status(500).json('Error calculating rent with service fee');
+            }
+
             const images = req.files
-            console.log(images)
             const roomData={
                 userId:Id,
                 latitude,
@@ -38,7 +58,7 @@ class UserHostController {
                 guests,
                 subdescription,
                 description,
-                rent,
+                rent: calculatedRent,
                 images,
                 is_blocked:false,
                 is_approved:false,
