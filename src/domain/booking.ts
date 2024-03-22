@@ -1,7 +1,7 @@
 import { ObjectId } from "mongoose";
 
 interface Booking{
-    totalAmount: string;
+    totalAmount: number;
     _id?: string;
     roomId:ObjectId;
     userId:ObjectId;
