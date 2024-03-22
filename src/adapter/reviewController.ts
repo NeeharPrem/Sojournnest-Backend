@@ -77,6 +77,74 @@ class reviewController {
             console.log(error)
         }
     }
+
+    // host review 
+    async hostReviewcheck(req: Request, res: Response) {
+        try {
+            const hostId = req.query.hostId;
+            const token = req.cookies.userJWT
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            const Id = decoded.userId
+            if (typeof hostId === 'string') {
+                const data = await this.reviewUsercase.hostReviewcheck(hostId, Id)
+                if (data) {
+                    return res.status(data.status).json(data.data)
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async postHostreview(req: Request, res: Response) {
+        try {
+            const hostId = req.params.id;
+            const token = req.cookies.userJWT
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            const Id = decoded.userId
+            req.body.hostId = hostId
+            req.body.userId = Id
+            const data = await this.reviewUsercase.postHostreview(req.body)
+            if (data) {
+                res.status(data.status).json(data?.data)
+            } else {
+                return res.status(500).json({ message: "Failed to add review." });
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async HostReviewEdit(req: Request, res: Response) {
+        try {
+            const hostId = req.params.id;
+            const token = req.cookies.userJWT
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            const Id = decoded.userId
+            req.body.hostId = hostId
+            req.body.userId = Id
+            const data = await this.reviewUsercase.HostReviewEdit(req.body)
+            if (data) {
+                res.status(data.status).json(data?.data)
+            } else {
+                return res.status(500).json({ message: "Failed to add review." });
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getHostReviews(req: Request, res: Response) {
+        try {
+            const hostId = req.params.id
+            const data = await this.reviewUsercase.getHostReviews(hostId)
+            if (data) {
+                return res.status(data.status).json(data.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 
 export default reviewController
