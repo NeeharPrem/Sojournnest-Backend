@@ -16,7 +16,7 @@ interface Rooms extends Document {
     latitude: number;
     description: string;
     userId: ObjectId;
-    rent: string;
+    rent: number;
     state: string;
     district: string;
     category: string;
@@ -64,8 +64,7 @@ const roomsSchema: Schema<Rooms> = new mongoose.Schema({
         default: "",
     },
     rent: {
-        type: String,
-        default: "",
+        type: Number
     },
     images: {
         type: [String],
