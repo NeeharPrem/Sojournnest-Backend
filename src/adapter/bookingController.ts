@@ -87,7 +87,6 @@ class BookingController{
             const status = req.query.status;
             const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
             const Id = decode.userId;
-
             if (status === undefined || typeof status === 'string') {
                 const Data = await this.BookingUsecase.upBookings(Id, status || 'upcoming');
                 return res.status(Data?.status || 400).json(Data?.data);
@@ -168,6 +167,32 @@ class BookingController{
             return res.status(500).json("Internal Server Error");
         }
     }
+
+    //host dashboard daata
+    async dashboard(req: Request, res: Response) {
+        try {
+            const token = req.cookies.userJWT;
+            const decode = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            const Id = decode.userId;
+            const Data =await this.BookingUsecase.dashboard(Id)
+            return res.status(Data?.status).json(Data.data)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    // admin dashboard
+    async adminDashboard(req: Request, res: Response) {
+        try {
+            const Data = await this.BookingUsecase.adminDashboard()
+            return res.status(Data?.status).json(Data.data)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
 }
 
 export default BookingController
