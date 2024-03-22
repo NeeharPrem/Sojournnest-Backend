@@ -52,6 +52,7 @@ class UserController {
         otp: otp,
         timestamp: Date.now()
       }
+      console.log(otpObj)
       req.app.locals.otp = otpObj;
       this.sendMailer.sendVerificationEmail(email, otp);
       res.status(200).json(message);
