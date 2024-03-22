@@ -10,9 +10,13 @@ export interface IBooking extends Document {
   checkOutDate: Date;
   cancelReq:boolean;
   isCancelled: boolean;
-  totalAmount: String;
+  totalAmount: number;
   status: string;
   cancelledRole:string;
+  chargeId:string;
+  refundId?:string;
+  serviceFee:number
+  refundType?:string;
 }
 
 const BookingSchema: Schema = new Schema({
@@ -26,8 +30,12 @@ const BookingSchema: Schema = new Schema({
   cancelReq:{type:Boolean,default:false},
   cancelledRole:{type:String},
   isCancelled: { type: Boolean, default: false },
-  totalAmount: { type: String, required: true },
+  totalAmount: { type: Number, required: true },
   status: { type: String, default: 'pending' },
+  chargeId:{type:String},
+  refundId: { type: String, default: ''},
+  serviceFee:{type:Number},
+  refundType:{type:String}
 }, { timestamps: true });
 
 BookingSchema.index({ roomId: 1, checkInDate: 1, checkOutDate: 1 }, { unique: true });
