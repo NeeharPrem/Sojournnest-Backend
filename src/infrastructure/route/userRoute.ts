@@ -2,16 +2,17 @@ import userController from "../../adapter/userController";
 import UserHostController from "../../adapter/userhsotController";
 import BookingController from "../../adapter/bookingController";
 import WishlistController from "../../adapter/wishlistController";
-import userRepository from "../repository/userRepository";
-import HostRepository from "../repository/HostRepository";
+import reviewController from "../../adapter/reviewController";
 import AmenityController from "../../adapter/amenitesController";
 import CategoryController from "../../adapter/categoryController";
+import reviewUsercase from "../../use_case/reviewUsecases";
 import Userusecase from "../../use_case/userUsecases";
 import UserHostUsecase from "../../use_case/userhostUsecase";
 import BookingUsecase from "../../use_case/bookingUsecase";
 import WishlistUsecase from "../../use_case/wishlistUsecase";
 import AmenitiesUsecase from "../../use_case/amenitiesUsecase";
 import CategoryUsecase from "../../use_case/categoryUsecase";
+import paymentUsecase from "../../use_case/paymentUsecase";
 import Encrypt from "../passwordRepository/hashpassword";
 import express  from "express";
 import GenerateOTP from "../utils/generateOtp";
@@ -28,6 +29,11 @@ import wishlistRepository from "../repository/wishlistRepository";
 import PaymentRepository from "../repository/paymentRepository";
 import AmenityRepository from "../repository/amenityRepository";
 import CategoryRepository from "../repository/categoryRepository";
+import userRepository from "../repository/userRepository";
+import HostRepository from "../repository/HostRepository";
+import reviewRepository from "../repository/reviewRepository";
+import hostreviewRepository from "../repository/hostreviewRepository";
+import paymensettingRepository from "../repository/paymensettingRepository";
 
 
 
@@ -46,21 +52,27 @@ const repositoryWishlist= new wishlistRepository()
 const paymentRepository = new PaymentRepository()
 const amenityRepository = new AmenityRepository();
 const categoryRepository = new CategoryRepository();
+const reviewrepository = new reviewRepository();
+const hostreviewrepository = new hostreviewRepository()
+const paymensettingrepository = new paymensettingRepository()
 
 const useCase=new Userusecase(encrypt,repository,JWTPassword)
 const hostuseCase= new UserHostUsecase(repositoryHost,cloudinary)
 const chatuseCase= new ChatUseCase(repository,repositoryChat,repositoryMessage)
-const bookingUsecase = new BookingUsecase(repositoryBooking, paymentRepository)
+const bookingUsecase = new BookingUsecase(repositoryBooking, paymentRepository,paymensettingrepository)
 const wishlistUsecase = new WishlistUsecase(repositoryWishlist)
 const amenityUsecase = new AmenitiesUsecase(amenityRepository);
-const categoryUsecase = new CategoryUsecase(categoryRepository)
+const categoryUsecase = new CategoryUsecase(categoryRepository);
+const paymentusecase = new paymentUsecase(paymensettingrepository)
+const reviewUsecases = new reviewUsercase(reviewrepository, repositoryBooking,hostreviewrepository);
 
 const controller = new userController(useCase, sendMail, cloudinary, generateOtp, chatuseCase)
-const hostcontroller= new UserHostController(hostuseCase,chatuseCase)
+const hostcontroller = new UserHostController(hostuseCase, chatuseCase, paymentusecase)
 const bookingcontroller = new BookingController(bookingUsecase)
 const whishlistcontroller= new WishlistController(wishlistUsecase)
 const amenityController = new AmenityController(amenityUsecase);
 const categoryController = new CategoryController(categoryUsecase)
+const reviewcontroller = new reviewController(reviewUsecases)
 
 const router=express.Router();
 
@@ -120,6 +132,21 @@ router.patch('/wishlist/:id', (req, res) => whishlistcontroller.removeWishlist(r
 // get amenities and category
 router.get('/amenities', (req, res) => amenityController.findAmenity(req, res));
 router.get('/category', (req, res) => categoryController.findCategory(req, res));
+
+//rating
+router.post('/rating/:id', (req, res) => reviewcontroller.addReview(req,res))
+router.patch('/rating/:id', (req, res) => reviewcontroller.roomReviewEdit(req,res))
+router.get('/rating/:id',(req,res)=>reviewcontroller.getRoomReviews(req,res))
+router.get('/rating',(req,res)=>reviewcontroller.bookingAndreview(req,res))
+
+// host review
+router.get('/host/rating', (req, res) => reviewcontroller.hostReviewcheck(req, res))
+router.post('/host/rating/:id', (req, res) => reviewcontroller.postHostreview(req, res))
+router.patch('/host/rating/:id', (req, res) => reviewcontroller.HostReviewEdit(req, res))
+router.get('/host/rating/:id', (req, res) => reviewcontroller.getHostReviews(req, res))
+
+//hostdashboard
+router.get('/host/hostdashboard', (req, res) => bookingcontroller.dashboard(req,res))
 
 // get user
 router.get("/:id", (req, res) => controller.getUser(req, res))
