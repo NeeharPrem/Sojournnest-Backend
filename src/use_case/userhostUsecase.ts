@@ -23,7 +23,6 @@ class UserHostUsecase {
                     return result?.secure_url;
                 })
             );
-            console.log(uploadImages)
             roomData.images=uploadImages
             const roomStatus = await this.IHostRepo.addnewRoom(roomData)
             if(roomStatus){
