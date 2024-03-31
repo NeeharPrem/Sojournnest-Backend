@@ -18,7 +18,8 @@
     "stripe": "^14.18.0"
   },
   "scripts": {
-    "start": "nodemon --max-old-space-size=4096"
+    "start": "nodemon --max-old-space-size=4096",
+    "dev": "nodemon --max-old-space-size=4096"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
