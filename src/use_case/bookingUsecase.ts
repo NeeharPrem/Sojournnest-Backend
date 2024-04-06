@@ -56,6 +56,7 @@ class BookingUsecase{
                 hostId: Data.hostId,
                 bookingStatus: true,
                 paymentMode: 'Card',
+                guests:Data.guests,
                 checkInDate: checkInDateISO,
                 checkOutDate: checkOutDateISO,
                 isCancelled: false,
@@ -173,9 +174,9 @@ class BookingUsecase{
                 let RefundCents=0;
                 if (Data.cancelReq === true) {
                     if (Data.refundType === 'full') {
-                        RefundCents = (Data.totalAmount + Data.serviceFee) * 100;
+                        RefundCents = (Data.totalAmount) * 100;
                     } else if (Data.refundType === 'partial') {
-                        RefundCents = Data.totalAmount * 100;
+                        RefundCents = (Data.totalAmount-Data.serviceFee) * 100;
                     }
                 } else {
                     RefundCents = (Data.totalAmount + Data.serviceFee) * 100;
