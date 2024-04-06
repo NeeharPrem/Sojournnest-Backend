@@ -26,7 +26,8 @@ class AdminRepository implements AdminRepo {
             const users = await UserModel.find({})
                 .limit(pageSize)
                 .skip((page - 1) * pageSize);
-            return users;
+            const total = await UserModel.countDocuments();
+            return { data: users, total };
         } catch (error) {
             console.error(error);
             return null;
