@@ -14,6 +14,7 @@ interface IUser extends Document {
   profilePic:string;
   verifyId:string;
   refreshToken?: string;
+  fcmToken?:string;
 }
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -67,6 +68,9 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: String,
     default: null,
   },
+  fcmToken: {
+    type: String,
+  }
 },
   {
     timestamps: true,
