@@ -12,6 +12,7 @@ interface Booking{
     status:string;
     checkInDate:string;
     checkOutDate:string;
+    guests:number
 }
 
 export default Booking
