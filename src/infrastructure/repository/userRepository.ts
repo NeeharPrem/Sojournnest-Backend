@@ -33,6 +33,16 @@ class userRepository implements UserRepo {
     return user;
   }
 
+  async saveFcmtoken(_id: string, fcmtoken:string): Promise<any>{
+    console.log(_id, fcmtoken)
+    const user = await UserModel.findOneAndUpdate(
+      { _id },
+      { $set: { fcmToken: fcmtoken } },
+      { new: true }
+    );
+    return user;
+  }
+
   async updateRefreshToken(_id: any, refreshToken: any): Promise<User | null> {
     const update = { refreshToken }; 
     const user = await UserModel.findOneAndUpdate(
