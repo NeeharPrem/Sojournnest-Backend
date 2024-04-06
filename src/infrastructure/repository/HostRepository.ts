@@ -53,6 +53,20 @@ class HostRepository implements IHostRepo {
         }
     }
 
+    async findAllListings(page: number, limit: number = 8): Promise<any> {
+        try {
+            const listData = await RoomsModel.find({})
+                .populate('userId')
+                .limit(limit)
+                .skip((page - 1) * limit);
+            const total = await RoomsModel.countDocuments();
+            return { data: listData, total };
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
 
     async findOneAndUpdate(_id: string, update: Partial<Room>): Promise<Room | null> {
         const user = await RoomsModel.findOneAndUpdate(
