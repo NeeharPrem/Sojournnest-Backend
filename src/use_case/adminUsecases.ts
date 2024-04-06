@@ -64,16 +64,13 @@ class adminUsercases{
         }
     }
 
-    async findUsers() {
+    async findUsers(page: number, limit: number) {
         try {
-            const Data = await this.IAdminRepo.findUsers()
+            const Data = await this.IAdminRepo.findUsers(page,limit)
             if(Data){
                 return {
                     status:200,
-                    data:{
-                        info:'user',
-                        data: Data
-                    }
+                    data: Data
                 }
             }else{
                 return {
@@ -132,16 +129,13 @@ class adminUsercases{
         }
     }
 
-    async findListings() {
+    async findListings(page:number,limit:number) {
         try {
-            const Data = await this.IHostRepo.findListings(1)
+            const Data = await this.IHostRepo.findAllListings(page,limit)
             if (Data) {
                 return {
                     status: 200,
-                    data: {
-                        info: "listings",
-                        data:Data
-                    }
+                    data: Data
                 }
             } else {
                 return {
