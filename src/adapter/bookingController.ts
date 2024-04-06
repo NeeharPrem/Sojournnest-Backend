@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import BookingUsecase from "../use_case/bookingUsecase";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 
-
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey) {
