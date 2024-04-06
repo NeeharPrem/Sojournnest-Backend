@@ -13,16 +13,28 @@ class BookingRepository implements IBookingRepo {
 
     async getBookings(id: string) {
         try {
-            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true } }).populate('roomId')
-            return bookings
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true },cancelReq:{$ne:true}})
+                .populate({
+                    path: 'roomId',
+                    select: 'name images'
+                }).exec();
+            return bookings;
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
+
     async canceledBookings(id: string) {
         try {
-            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['cancelled'] }}).populate('roomId')
+            const bookings = await BookingsModal.find({
+                userId: id, $or: [
+                    { status: 'cancelled' },
+                    { cancelReq: true }
+                ]}).populate({
+                path: 'roomId',
+                select: 'name images'
+            }).exec();
             return bookings
         } catch (error) {
             console.log(error)
@@ -50,7 +62,7 @@ class BookingRepository implements IBookingRepo {
             }
             console.log(queryCondition, 'sts')
             const skip = (page - 1) * limit;
-            const bookings = await BookingsModal.find({queryCondition})
+            const bookings = await BookingsModal.find(queryCondition)
                 .populate([{ path: 'userId' }, { path: 'roomId' }])
                 .limit(limit)
                 .skip(skip);
