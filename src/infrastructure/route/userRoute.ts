@@ -84,8 +84,7 @@ router.get("/",(req, res) => controller.profile(req, res))
 router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 router.put("/:id",ImageUpload.single('verifyId'), (req, res) => controller.uploadId(req, res))
 router.get('/listings/:id',(req, res) => hostcontroller.roomDetail(req, res))
-//user chats
-// router.post('/chat', (req, res) => controller.newConversation(req,res))
+router.post('/fcm',(req,res)=>controller.saveFcmtoken(req,res))
 
 // host 
 router.get('/host/listings', (req,res)=>hostcontroller.getListings(req,res))
