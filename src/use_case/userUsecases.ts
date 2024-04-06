@@ -129,6 +129,25 @@ class UserUseCase {
     }
   }
 
+  async saveFcmtoken(_id: string,fcmtoken:string) {
+    const getUser = await this.UserRepository.findById(_id);
+    if (getUser) {
+      const updatedUser= await this.UserRepository.saveFcmtoken(_id,fcmtoken)
+      if (!updatedUser) {
+        return {
+          status: 400,
+          message: "User not found",
+        };
+      } else {
+        console.log("FCM token updated successfully");
+        return {
+          status: 200,
+          message: "FCM token updated successfully",
+        };
+      }
+  }
+}
+
    
   async updateProfile(id: string, user: User, newPassword?: string) {
     const userData = await this.UserRepository.findOneAndUpdate(id, {
