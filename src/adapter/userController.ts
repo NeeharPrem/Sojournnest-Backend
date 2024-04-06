@@ -141,10 +141,22 @@ class UserController {
     } 
   }
 
+  async saveFcmtoken(req: Request, res: Response) {
+    try {
+      const token = req.cookies.userJWT
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+      const Id = decoded.userId;
+      const output = await this.userCase.saveFcmtoken(Id, req.body.fcmtoken);
+      res.status(output?.status ?? 200).json(output?.message ?? 'Success');
+    } catch (error) {
+      const err: Error = error as Error;
+      res.status(400).json(err.message);
+    }
+  }
+
   async getUser(req: Request, res: Response) {
     try {
      const Id=req.params.id
-     console.log(Id,'in getuser')
       const user = await this.userCase.profile(Id);
       res.status(user.status).json(user.data);
     } catch (error) {
