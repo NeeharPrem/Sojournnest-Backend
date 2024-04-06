@@ -13,6 +13,7 @@ interface User{
     is_blocked:boolean,
     is_verified:boolean;
     refreshToken?: string;
+    fcmToken?:string;
 }
 
 export default User
