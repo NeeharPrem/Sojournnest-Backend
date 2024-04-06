@@ -10,7 +10,6 @@ class conversationRepository implements IConversationRepoInterface{
 
     async save(userIds: Array<{ memberId: string }>, senderId: string): Promise<any> {
         try {
-            console.log(senderId,"sender")
             const membersArray: Member[] = userIds.map(({ memberId }) => ({
                 userId: memberId,
                 lastSeen: memberId === senderId ? new Date() : undefined,
@@ -54,7 +53,6 @@ class conversationRepository implements IConversationRepoInterface{
 
     async findByUserId(id: string): Promise<any> {
         const conversations = await ConversationModel.find({ "members.userId": id })
-        console.log(conversations)
         if (conversations) {
             return conversations
         } else {
