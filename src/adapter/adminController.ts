@@ -42,7 +42,9 @@ class AdminController{
 
     async allUsers(req: Request, res: Response) {
         try {
-            const users = await this.adminUsecase.findUsers();
+            const page = parseInt((req.query.page as string) || '1', 10);
+            const limit = parseInt((req.query.limit as string) || '10', 10);
+            const users = await this.adminUsecase.findUsers(page,limit);
             if (users) {
                 const { status, data } = users;
                 return res.status(status).json(data);
@@ -77,7 +79,9 @@ class AdminController{
 
     async allListings(req: Request, res: Response) {
         try {
-            const Data = await this.adminUsecase.findListings();
+            const page = parseInt((req.query.page as string) || '1', 10);
+            const limit = parseInt((req.query.limit as string) || '10', 10);
+            const Data = await this.adminUsecase.findListings(page,limit);
             if (Data) {
                 const { status, data } = Data;
                 return res.status(status).json(data);
