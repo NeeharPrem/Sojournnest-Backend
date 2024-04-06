@@ -6,6 +6,7 @@ export interface IBooking extends Document {
   hostId: ObjectId;
   bookingStatus: boolean;
   paymentMode: string;
+  guests:number;
   checkInDate: Date;
   checkOutDate: Date;
   cancelReq:boolean;
@@ -25,6 +26,7 @@ const BookingSchema: Schema = new Schema({
   hostId: { type: Schema.Types.ObjectId, required: true,index:true,ref:'User'},
   bookingStatus: { type: Boolean, default: true },
   paymentMode: { type: String, required: true },
+  guests:{type:Number},
   checkInDate: { type: Date, required: true },
   checkOutDate: { type: Date, required: true },
   cancelReq:{type:Boolean,default:false},
