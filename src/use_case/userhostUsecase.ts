@@ -19,7 +19,7 @@ class UserHostUsecase {
         try {
             const uploadImages = await Promise.all(
                 roomData.images.map(async (file: any) => {
-                    const result = await this.CloudinarySetup.upload(file.path, "Hosted-places");
+                    const result = await this.CloudinarySetup.upload(file.path,"Hosted-places");
                     return result?.secure_url;
                 })
             );
@@ -111,40 +111,49 @@ class UserHostUsecase {
     }
 
     async roomDataUpdate(id: string, roomData: Partial<Room>) {
-        console.log("here")
         try {
-            const uploadImages = await Promise.all(
-                roomData.images.map(async (file: any) => {
+            const existingRoom = await this.IHostRepo.findById(id);
+            if (!existingRoom) {
+                return { status: 404, data: { message: "Room not found" } };
+            }
+
+            let uploadImages = [];
+            if (roomData.images) {
+                uploadImages = await Promise.all(roomData.images.map(async (file: any) => {
                     const result = await this.CloudinarySetup.upload(file.path, "Hosted-places");
                     return result?.secure_url;
-                })
-            );
-            console.log(uploadImages)
-            roomData.images = uploadImages
-            const updatedData = await this.IHostRepo.findOneAndUpdate({ _id: id }, roomData, { new: true });
-            if (updatedData) {
-                return {
-                    status: 200,
-                    data: updatedData
-                };
-            } else {
-                return {
-                    status: 404,
-                    data: {
-                        message: "Room not found"
+                }));
+            }
+            const updatedImages = existingRoom.images ? existingRoom.images.concat(uploadImages) : uploadImages;
+
+            let updatedAmenities = existingRoom.amenities ? [...existingRoom.amenities] : [];
+            if (typeof roomData.amenities === 'string') {
+                try {
+                    const amenitiesArray = JSON.parse(roomData.amenities);
+                    if (Array.isArray(amenitiesArray)) {
+                        updatedAmenities = updatedAmenities.concat(amenitiesArray);
                     }
-                };
+                } catch (parseError) {
+                    console.error("Error parsing amenities:", parseError);
+                }
+            } else if (Array.isArray(roomData.amenities)) {
+                updatedAmenities = updatedAmenities.concat(roomData.amenities);
+            }
+
+            const updatedRoomData = { ...roomData, images: updatedImages, amenities: updatedAmenities };
+
+            const updatedData = await this.IHostRepo.findOneAndUpdate({ _id: id }, updatedRoomData, { new: true });
+            if (updatedData) {
+                return { status: 200, data: updatedData };
+            } else {
+                return { status: 404, data: { message: "Room not found" } };
             }
         } catch (error) {
             console.error("Error updating room data:", error);
-            return {
-                status: 500,
-                data: {
-                    message: "Internal server error"
-                }
-            };
+            return { status: 500, data: { message: "Internal server error" } };
         }
     }
+
 
     async findListings(page: number, pageSize: number = 8) {
         try {
