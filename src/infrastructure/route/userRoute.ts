@@ -84,10 +84,10 @@ router.get("/", protect,(req, res) => controller.profile(req, res))
 router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 router.put("/:id", protect,ImageUpload.single('verifyId'), (req, res) => controller.uploadId(req, res))
 router.get('/listings/:id',(req, res) => hostcontroller.roomDetail(req, res))
-router.post('/fcm', protect,(req,res)=>controller.saveFcmtoken(req,res))
+router.post('/fcm',(req,res)=>controller.saveFcmtoken(req,res))
 
 // host 
-router.get('/host/listings', protect, (req,res)=>hostcontroller.getListings(req,res))
+router.get('/host/listings', (req,res)=>hostcontroller.getListings(req,res))
 router.put('/host/listings', protect, ImageUpload.array('images'),(req,res)=>hostcontroller.addRoom(req,res))
 router.get('/host/listings/:id', protect, (req, res) => hostcontroller.roomData(req, res))
 router.patch('/host/listings/:id', protect, (req,res)=>hostcontroller.unlist(req,res))
