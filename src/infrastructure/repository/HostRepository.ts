@@ -40,11 +40,21 @@ class HostRepository implements IHostRepo {
 
     async findListings(page: number, pageSize: number = 8): Promise<any> {
         try {
-            const totalCount = await RoomsModel.countDocuments();
-            const listData = await RoomsModel.find({})
+            const totalCount = await RoomsModel.countDocuments({
+                is_blocked: false,
+                is_listed: true,
+                is_approved: true
+            });
+
+            const listData = await RoomsModel.find({
+                is_blocked: false,
+                is_listed: true,
+                is_approved: true
+            })
                 .populate('userId')
                 .limit(pageSize)
                 .skip((page - 1) * pageSize);
+
             const hasMore = page * pageSize < totalCount;
             return { data: listData, hasMore };
         } catch (error) {
