@@ -172,18 +172,22 @@ class BookingUsecase{
             const Data = await this.IBooking.checkBookingById(id);
             if (Data) {
                 let RefundCents=0;
+                let pass=''
                 if (Data.cancelReq === true) {
                     if (Data.refundType === 'full') {
                         RefundCents = (Data.totalAmount) * 100;
+                        pass="full"
                     } else if (Data.refundType === 'partial') {
                         RefundCents = (Data.totalAmount-Data.serviceFee) * 100;
+                        pass="partial"
                     }
                 } else {
-                    RefundCents = (Data.totalAmount + Data.serviceFee) * 100;
+                    RefundCents = (Data.totalAmount) * 100;
+                    pass='full'
                 }
                 RefundCents = Math.round(RefundCents);
                 const refundOut = await this.PaymentRepo.createRefund(Data.chargeId, RefundCents);
-                const RefundData = await this.IBooking.hostupdateBookingStatus(id, refundOut?.id ?? '');
+                const RefundData = await this.IBooking.hostupdateBookingStatus(id, refundOut?.id ?? '',pass);
                 if (RefundData) {
                     return { status: 200, data: Data };
                 } else {
@@ -240,6 +244,46 @@ class BookingUsecase{
             };
         }
     }
+
+    async hostConfirmBooking(bookingId: string) {
+        try {
+            const booking = await this.IBooking.BookingById(bookingId);
+            if (!booking) {
+                return {
+                    status: 404,
+                    data: { message: "Booking not found or does not belong to the user" },
+                };
+            }
+
+            if (booking.status === "confirmed") {
+                return {
+                    status: 200,
+                    data: { message: "Booking is already confirmed" },
+                };
+            }
+
+            const updatedBooking = await this.IBooking.hostConfirmBooking(bookingId);
+
+            if (!updatedBooking) {
+                return {
+                    status: 400,
+                    data: { message: "Unable to confirm booking at this time" },
+                };
+            }
+
+            return {
+                status: 200,
+                data: { message: "Booking confirmed" },
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                status: 500,
+                data: { message: "An error occurred while confirming the booking" },
+            };
+        }
+    }
+
 
 
     async getBookingdate(id:string) {
