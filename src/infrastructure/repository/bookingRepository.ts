@@ -100,18 +100,36 @@ class BookingRepository implements IBookingRepo {
     }
 }
 
-    async hostupdateBookingStatus(bookingId: string, refundId: string) {
+    async hostupdateBookingStatus(bookingId: string, refundId: string, pass: string) {
         try {
-            const result = await BookingsModal.updateOne(
-                { _id: bookingId },
-                { $set: { refundId: refundId } }
-            );
+            let updateOperation;
+            if (pass === "full") {
+                updateOperation = {
+                    $set: {
+                        refundId: refundId,
+                        status: "cancelled",
+                        isCancelled: true,
+                        serviceFee: 0
+                    }
+                };
+            } else {
+                updateOperation = {
+                    $set: {
+                        refundId: refundId,
+                        status: "cancelled",
+                        isCancelled: true
+                    }
+                };
+            }
+
+            const result = await BookingsModal.updateOne({ _id: bookingId }, updateOperation);
             return result;
         } catch (error) {
             console.error("Error updating booking status:", error);
             throw new Error("Database error");
         }
     }
+
 
     async createdTime(Id: string, bookingId: string) {
         try {
@@ -126,6 +144,16 @@ class BookingRepository implements IBookingRepo {
     async getBookingById(Id:string,bookingId:string) {
         try {
             const booking = await BookingsModal.findOne({ _id: bookingId, userId:Id });
+            return booking;
+        } catch (error) {
+            console.error("Error fetching booking by ID:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    async BookingById(bookingId: string) {
+        try {
+            const booking = await BookingsModal.findOne({ _id: bookingId});
             return booking;
         } catch (error) {
             console.error("Error fetching booking by ID:", error);
@@ -148,6 +176,19 @@ class BookingRepository implements IBookingRepo {
             const result = await BookingsModal.updateOne(
                 { _id: bookingId },
                 { $set: {refundType: refundType, cancelReq: true} }
+            );
+            return result;
+        } catch (error) {
+            console.error("Error updating booking status:", error);
+            throw new Error("Database error");
+        }
+    }
+
+    async hostConfirmBooking(bookingId:string) {
+        try {
+            const result = await BookingsModal.updateOne(
+                { _id: bookingId },
+                { $set: {status:"confirmed"}}
             );
             return result;
         } catch (error) {
