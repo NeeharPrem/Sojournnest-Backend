@@ -94,7 +94,7 @@ router.patch('/host/listings/:id', protect, (req,res)=>hostcontroller.unlist(req
 router.put('/host/listings/:id', protect, ImageUpload.array('images'), (req, res) => hostcontroller.roomDataUpdate(req, res))
 
 // getting the listing data
-router.get('/listings', protect, (req, res) => hostcontroller.allListings(req, res));
+router.get('/listings', (req, res) => hostcontroller.allListings(req, res));
 
 // host chat
 router.post('/host/chat', protect,(req, res) => hostcontroller.newConversation(req, res))
