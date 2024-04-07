@@ -49,31 +49,31 @@ const paymentcontroller = new paymentController(paymentusecase)
 const router = express.Router();
 
 // user action routes
-router.get("/users",(req,res)=>controller.allUsers(req,res));
-router.post("/users/:id",(req,res)=>controller.blockUser(req,res));
-router.patch("/users/:id", (req, res) => controller.approveUser(req, res));
+router.get("/users", adminProtect,(req,res)=>controller.allUsers(req,res));
+router.post("/users/:id", adminProtect,(req,res)=>controller.blockUser(req,res));
+router.patch("/users/:id", adminProtect,(req, res) => controller.approveUser(req, res));
 
 //Listing action routes
-router.get("/listings", (req, res) => controller.allListings(req,res));
-router.post('/listings/:id', (req, res) => controller.approveListing(req, res));
-router.patch('/listings/:id',(req,res)=>controller.blocListing(req,res));
+router.get("/listings", adminProtect,(req, res) => controller.allListings(req,res));
+router.post('/listings/:id', adminProtect,(req, res) => controller.approveListing(req, res));
+router.patch('/listings/:id', adminProtect,(req,res)=>controller.blocListing(req,res));
 // amenites
-router.get('/amenities', (req, res) => amenityController.findAmenity(req, res));
-router.put('/amenities', (req, res) => amenityController.newEntry(req, res));
-router.post('/amenities',(req,res)=>amenityController.editEntry(req,res))
-router.patch("/amenities",(req,res)=>amenityController.deleteEntry(req,res))
+router.get('/amenities', adminProtect,(req, res) => amenityController.findAmenity(req, res));
+router.put('/amenities', adminProtect,(req, res) => amenityController.newEntry(req, res));
+router.post('/amenities', adminProtect,(req,res)=>amenityController.editEntry(req,res))
+router.patch("/amenities", adminProtect,(req,res)=>amenityController.deleteEntry(req,res))
 //category
-router.get('/category', (req, res) => categoryController.findCategory(req, res));
-router.put('/category', (req, res) => categoryController.newEntry(req, res));
-router.patch("/category", (req, res) => categoryController.deleteEntry(req, res))
-router.post("/category", (req, res) => categoryController.editEntry(req, res))
+router.get('/category', adminProtect,(req, res) => categoryController.findCategory(req, res));
+router.put('/category', adminProtect,(req, res) => categoryController.newEntry(req, res));
+router.patch("/category", adminProtect,(req, res) => categoryController.deleteEntry(req, res))
+router.post("/category", adminProtect,(req, res) => categoryController.editEntry(req, res))
 
 // admin dashboard
-router.get('/adminDashboard', (req, res) => bookingController.adminDashboard(req,res))
+router.get('/adminDashboard', adminProtect,(req, res) => bookingController.adminDashboard(req,res))
 
 // bookings
-router.get('/bookings',(req,res)=>bookingController.allbookings(req,res))
+router.get('/bookings', adminProtect,(req,res)=>bookingController.allbookings(req,res))
 
 //payment setting
-router.post('/payments', (req,res) => paymentcontroller.addServiceFee(req,res))
+router.post('/payments', adminProtect,(req,res) => paymentcontroller.addServiceFee(req,res))
 export default router;
