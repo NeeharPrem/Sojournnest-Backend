@@ -10,22 +10,22 @@ declare global {
 }
 
 export const adminProtect = async (req: Request, res: Response, next: NextFunction) => {
-        let token = req.cookies.adminJWT;
-    if(token){
+    const token = req.cookies.adminJWT;
+     console.log(token)
+    if (token) {
         try {
-            const decode = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload
-            if(decode){
-                if(!decode.role || decode.role !== 'admin'){
-                    return res.status(401).json({message:"Not atherized, invalid token"})
-                }
-                next()
-            }else{
-                return res.status(401).json({message:"Not autherized, invalid token"})
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as JwtPayload;
+            if (decoded.role === 'admin') {
+                req.adminId = decoded.id;
+                next();
+            } else {
+                return res.status(401).json({ message: "Not authorized, invalid role" });
             }
         } catch (error) {
-            return res.status(401).json({message:"Not autherized, invalide token"})
+            console.error(error);
+            return res.status(401).json({ message: "Not authorized, invalid token" });
         }
-    }else{
-        return res.status(401).json("Not autherized, invalide token")
+    } else {
+        return res.status(401).json({ message: "Not authorized, token not found" });
     }
 };
