@@ -19,8 +19,9 @@
     "stripe": "^14.18.0"
   },
   "scripts": {
-    "start": "nodemon",
-    "dev": "nodemon --max-old-space-size=4096"
+    "start": "nodemon --max-old-space-size=409",
+    "dev": "nodemon --max-old-space-size=4096",
+    "build":"tsc -p"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
