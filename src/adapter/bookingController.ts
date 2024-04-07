@@ -121,6 +121,20 @@ class BookingController{
         }
     }
 
+    async hostConfirmBooking(req: Request, res: Response) {
+        try {
+            const bookingId = req.params.id
+            if (typeof bookingId === 'string') {
+                const Data = await this.BookingUsecase.hostConfirmBooking(bookingId)
+                return res.status(Data?.status || 400).json(Data?.data)
+            } else {
+                return res.status(400).json({ message: 'Invalid booking ID' });
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     async getBookingdate(req: Request, res: Response) {
         try {
             const roomId= req.params.id
