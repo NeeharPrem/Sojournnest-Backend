@@ -25,7 +25,7 @@ class PaymentRepository {
                 },
             ],
             mode: "payment",
-            success_url: `http://localhost:5000/success/${data.hostId}`,
+            success_url: `http://localhost:5000/payscs`,
             cancel_url: "http://localhost:5000/failed",
             billing_address_collection: 'required',
         });
