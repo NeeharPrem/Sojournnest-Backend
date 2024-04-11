@@ -92,6 +92,41 @@ class UserController {
     }
   }
 
+  async checkMailOtp(req: Request, res: Response) {
+    try {
+      console.log(req.body.email)
+      const user = await this.userCase.resetPass1(req.body.email);
+      console.log(user)
+      if (user.data.state === true && user?.data?.data) {
+        const data = {
+          state: false,
+          message: 'User already exists with the given email'
+        };
+        res.status(200).json(data);
+      } else if (user.data.state === false) {
+        const email = req.body.email;
+        const otp = await this.genOtp.generateOtp(4);
+        this.sendMailer.sendVerificationEmail(email, otp);
+        const data = {
+          state: true,
+          message: "OTP sent successfully"
+        };
+        req.app.locals.email = email;
+        req.app.locals.otp = otp;
+        res.status(200).json(data);
+      } else {
+        res.status(400).json({
+          state: false,
+          message: "Unexpected state"
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+
   async resetPass2(req: Request, res: Response) {
     try {
       let otpF=req.body.otp
@@ -255,6 +290,18 @@ class UserController {
         const user = await this.userCase.updateProfile(req.userId || '', req.body, req.body.newPassword);
         res.status(user.status).json(user.data);
       }
+    } catch (error) {
+      const err: Error = error as Error;
+      res.status(400).json(err.message);
+    }
+  }
+
+  async updateEmail(req: Request, res: Response) {
+    try {
+        const id= req.body.id
+        const email= req.body.email
+      const user = await this.userCase.updateEmail(id,email);
+        res.status(user.status).json(user)
     } catch (error) {
       const err: Error = error as Error;
       res.status(400).json(err.message);
