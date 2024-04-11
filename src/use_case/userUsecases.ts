@@ -235,6 +235,23 @@ class UserUseCase {
     }
   }
 
+  async updateEmail(id: string, email: string) {
+    const updatedUserData = await this.UserRepository.findOneAndUpdate(id, { email: email });
+    if (!updatedUserData) {
+      return {
+        status: 400,
+        data: { message: 'User not found' },
+      };
+    }
+    return {
+      status: 200,
+       data:{
+        message:'Email updated',
+       }
+    };
+  }
+
+
   async updateId(id: string, verifyId:string) {
     console.log(id,'idd')
     const userData = await this.UserRepository.findOneAndUpdate(id, {
