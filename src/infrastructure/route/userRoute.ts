@@ -84,6 +84,8 @@ router.post("/sent-otp", (req, res) => controller.resetPass1(req, res))
 router.post("/otp-verify", (req, res) => controller.resetPass2(req, res))
 router.post("/otp-resent", (req, res) => controller.resendOtp2(req, res))
 router.post('/setnewpass', (req, res) => controller.setnewpass(req,res))
+router.post('/checkMail',(req,res)=>controller.checkMailOtp(req,res))
+router.post('/updateEmail', (req, res) => controller.updateEmail(req,res))
 
 // profile
 router.get("/",(req, res) => controller.profile(req, res))
