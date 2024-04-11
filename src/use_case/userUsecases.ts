@@ -39,6 +39,50 @@ class UserUseCase {
     }
   }
 
+  async resetPass1(email:string) {
+    const existingUser = await this.UserRepository.findByEmail(email);
+    if (existingUser) {
+      return {
+        status: 200,
+        data: {
+          state: true,
+          data: existingUser,
+          message: "User exisists",
+        }
+      };
+    } else {
+      return {
+        status: 400,
+        data: {
+          state: false,
+          message: 'No user found'
+        }
+      };
+    }
+  }
+
+  async updatePass(email: string, newPassword: string) {
+    const userData = await this.UserRepository.findByEmail(email);
+    if (!userData) {
+      return { status: 404, data: { message: 'User not found.' } };
+    }
+    if (userData.isGoogleAccount) {
+      return { status: 400, data: { message: 'Password reset is not available for Google signed-up accounts. Please use Google to log in.' } };
+    }
+
+    const isSamePassword = await this.Encrypt.compare(newPassword, userData.password);
+    if (isSamePassword) {
+      return { status: 400, data: { message: 'The new password must be different from the current password' } };
+    }
+    const id = userData._id;
+    if (id) {
+        const updatedUserData = await this.UserRepository.findOneAndUpdate(id, { password: await this.Encrypt.generateHash(newPassword) });
+        return { status: 200, data: updatedUserData, message: 'Password changed' };
+    } else {
+        return { status: 400, data: { message: 'User ID is undefined.' } };
+    }
+}
+
   async newUser(user:User){
     const hashedPass = await this.Encrypt.generateHash(user.password)
     const newUser = { ...user,is_verified:true,password: hashedPass }
