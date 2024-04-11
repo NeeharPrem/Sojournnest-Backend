@@ -57,9 +57,99 @@ class UserController {
     }
   }
 
+  async resetPass1(req: Request, res: Response) {
+    try {
+      const user = await this.userCase.resetPass1(req.body.email)
+      console.log(user)
+      if (user.data.state === true && user?.data?.data && user.data.data.is_google == true) {
+        const status= 200
+        const data= {
+          state:false,
+          message:'Password reset is not available for Google signed-up accounts'
+        }
+        res.status(status).json(data);
+      } else if (user.data.state === true && user?.data?.data&& user.data.data.is_google!=true && user.data.data.is_verified==true) {
+        const data={
+          state:true,
+          message: "OTP sent successfully"
+        }
+        const email = req.body.email
+        req.app.locals.email= email
+        const otp = await this.genOtp.generateOtp(4)
+        req.app.locals.otp = otp;
+        this.sendMailer.sendVerificationEmail(email, otp);
+        res.status(200).json(data);
+      }else if (user.data.state===false){
+        const data = {
+          state: false,
+          message: "No user found"
+        }
+        res.status(200).json(data);
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async resetPass2(req: Request, res: Response) {
+    try {
+      let otpF=req.body.otp
+      let otpR = req.app.locals.otp
+      if (otpR=== otpF) {
+        req.app.locals.otp = null;
+        const status= 200
+        const data={
+          state:true,
+          message:'Verification success'
+        }
+        res.status(status).json(data);
+      } else {
+        const data={
+          message: "Invalid OTP"
+        }
+        res.status(400).json(data);
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async resendOtp2(req: Request, res: Response) {
+    try {
+      const message = "OTP resent successfully"
+      const email = req.app.locals.email
+      const otpR = await this.genOtp.generateOtp(4)
+      req.app.locals.otp = otpR;
+      this.sendMailer.sendVerificationEmail(email, otpR);
+      res.status(200).json(message);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async setnewpass(req: Request, res: Response) {
+    try {
+      const email = req.app.locals.email
+      const user = await this.userCase.resetPass1(email);
+      if (user) {
+        const updated = await this.userCase.updatePass(email, req.body.password)
+       res.status(updated.status).json(updated)
+      }else{
+        const data= {
+          message:'Failed to updated password'
+        }
+        res.status(400).json(data)
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(401).json(err);
+    }
+  } 
   async verifyotp(req: Request, res: Response) {
     try {
-      console.log(req.app.locals.otp,'otploc',req.body.otp,'otpbo')
         let otpF=req.body.otp
       let otpR = req.app.locals.otp
       if (otpR=== otpF) {
