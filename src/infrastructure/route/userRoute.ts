@@ -80,6 +80,12 @@ const router=express.Router();
 router.post("/", (req, res) => controller.signup(req, res));
 router.post("/verify-otp", (req, res) => controller.verifyotp(req,res))
 router.post("/resend-otp", (req, res) => controller.resendOtp(req, res))
+router.post("/sent-otp", (req, res) => controller.resetPass1(req, res))
+router.post("/otp-verify", (req, res) => controller.resetPass2(req, res))
+router.post("/otp-resent", (req, res) => controller.resendOtp2(req, res))
+router.post('/setnewpass', (req, res) => controller.setnewpass(req,res))
+
+// profile
 router.get("/",(req, res) => controller.profile(req, res))
 router.patch("/:id", protect, ImageUpload.single('avatar'),(req,res)=>controller.updateProfile(req,res))
 router.put("/:id", protect,ImageUpload.single('verifyId'), (req, res) => controller.uploadId(req, res))
