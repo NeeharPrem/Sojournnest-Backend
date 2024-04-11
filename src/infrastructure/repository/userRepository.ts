@@ -34,7 +34,6 @@ class userRepository implements UserRepo {
   }
 
   async saveFcmtoken(_id: string, fcmtoken:string): Promise<any>{
-    console.log(_id, fcmtoken)
     const user = await UserModel.findOneAndUpdate(
       { _id },
       { $set: { fcmToken: fcmtoken } },
