@@ -13,7 +13,7 @@ class BookingRepository implements IBookingRepo {
 
     async getBookings(id: string) {
         try {
-            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending'] }, isCancelled: { $ne: true },cancelReq:{$ne:true}})
+            const bookings = await BookingsModal.find({ userId: id, status: { $in: ['confirmed', 'pending','completed'] }, isCancelled: { $ne: true },cancelReq:{$ne:true}})
                 .populate({
                     path: 'roomId',
                     select: 'name images'
