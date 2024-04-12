@@ -10,6 +10,7 @@ import http from "http";
 import path from 'path'
 const morgan = require('morgan')
 import initializeSocket from "./socketServer";
+import { setupCronJobs } from './scheduler';
 
 
 const createServer = () => {
@@ -21,6 +22,7 @@ const createServer = () => {
     app.use(express.json());
     app.use(express.static(path.join(__dirname, '../public')));
 
+    setupCronJobs()
     app.use(cookieParser());
     app.options("*", cors());
     app.use("/api/users", userRouter);
